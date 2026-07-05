@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>LexiLearn - 登录</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#4C52E8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LexiLearn">
+<style>
+:root {
+  --bg: #F0F2FA; --surface: #FFF; --surface-2: #F5F6FF;
+  --border: rgba(99,102,180,.12); --border-s: rgba(99,102,180,.28);
+  --ink: #1A1F36; --ink-2: #4A5080; --ink-3: #8890C0;
+  --accent: #4C52E8; --accent-2: #7B5CEA; --accent-lt: #EEEEFF;
+  --accent-glow: rgba(76,82,232,.18);
+  --r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+  --sh-sm:0 4px 12px rgba(26,31,54,.08);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --bg:#0F1124;--surface:#1A1F3A;--surface-2:#222844;
+  --border:rgba(120,128,220,.12);--border-s:rgba(120,128,220,.24);
+  --ink:#E8EAFA;--ink-2:#9AA0D0;--ink-3:#5A6098;
+  --accent:#6B70FF;--accent-2:#9B7FFF;--accent-lt:rgba(107,112,255,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%}
+body{
+  font-family:-apple-system,'SF Pro Text','PingFang SC','Helvetica Neue',sans-serif;
+  background:var(--bg);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;min-height:100vh;
+}
+.auth-card{
+  background:var(--surface);border-radius:var(--r-xl);
+  padding:32px 28px;width:100%;max-width:380px;
+  box-shadow:var(--sh-sm);border:1px solid var(--border);
+}
+.logo{text-align:center;margin-bottom:28px;}
+.logo-mark{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;color:#fff;}
+.logo-name{font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.03em;}
+.logo-sub{font-size:12px;color:var(--ink-3);margin-top:4px;}
+.tabs{display:flex;background:var(--surface-2);border-radius:var(--r-sm);padding:4px;gap:3px;margin-bottom:24px;}
+.tab-btn{flex:1;text-align:center;padding:10px 0;font-size:14px;font-weight:700;cursor:pointer;border-radius:8px;color:var(--ink-3);transition:all .2s;border:none;background:none;font-family:inherit;}
+.tab-btn.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(26,31,54,.06);}
+.panel{display:none;flex-direction:column;gap:14px;}
+.panel.active{display:flex;animation:fade-in .22s var(--ease);}
+@keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:12px;font-weight:700;color:var(--ink-3);}
+.field-input{
+  width:100%;padding:12px 14px;font-size:14px;font-family:inherit;
+  border:1.5px solid var(--border-s);border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink);outline:none;
+  transition:border-color .2s;
+}
+.field-input:focus{border-color:var(--accent);}
+.submit-btn{
+  width:100%;padding:14px;font-size:15px;font-family:inherit;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;
+  letter-spacing:.02em;box-shadow:0 4px 16px var(--accent-glow);
+  transition:opacity .15s,transform .15s;
+}
+.submit-btn:active{opacity:.88;transform:scale(.98);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.error-msg{font-size:12px;color:#E05050;text-align:center;min-height:18px;padding:2px 0;}
+.dark-toggle{
+  position:fixed;top:20px;right:20px;z-index:10;
+  width:38px;height:38px;border:1.5px solid var(--border-s);border-radius:var(--r-md);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+</style>
+</head>
+<body>
+<div class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙</div>
+<div class="auth-card">
+  <div class="logo">
+    <div class="logo-mark">📖</div>
+    <div class="logo-name">LexiLearn</div>
+    <div class="logo-sub">英语单词复习助手</div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="login" onclick="switchTab('login')">登录</button>
+    <button class="tab-btn" data-tab="register" onclick="switchTab('register')">注册</button>
+  </div>
+
+  <div class="panel active" id="panel-login">
+    <div class="field">
+      <label class="field-label">邮箱</label>
+      <input class="field-input" id="login-email" type="email" placeholder="请输入邮箱" autocomplete="email">
+    </div>
+    <div class="field">
+      <label class="field-label">密码</label>
+      <input class="field-input" id="login-pwd" type="password" placeholder="请输入密码" autocomplete="current-password">
+    </div>
+    <div class="error-msg" id="login-error"></div>
+    <button class="submit-btn" id="login-btn" onclick="doLogin()">登 录</button>
+  </div>
+
+  <div class="panel" id="panel-register">
+    <div class="field">
+      <label class="field-label">邮箱</label>
+      <input class="field-input" id="reg-email" type="email" placeholder="请输入邮箱" autocomplete="email">
+    </div>
+    <div class="field">
+      <label class="field-label">昵称（可选）</label>
+      <input class="field-input" id="reg-nickname" type="text" placeholder="给自己取个名字" autocomplete="nickname">
+    </div>
+    <div class="field">
+      <label class="field-label">密码</label>
+      <input class="field-input" id="reg-pwd" type="password" placeholder="至少4位" autocomplete="new-password">
+    </div>
+    <div class="error-msg" id="reg-error"></div>
+    <button class="submit-btn" id="reg-btn" onclick="doRegister()">注 册</button>
+  </div>
+</div>
+
+<script>
+// ── Config ──
+const API_BASE = 'https://minziqian48.pythonanywhere.com/api';
+const TOKEN_KEY = 'lexiword_token';
+
+// ── Helpers ──
+function $(id) { return document.getElementById(id); }
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+
+// ── Tab switching ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  $('panel-' + name).classList.add('active');
+  $('login-error').textContent = '';
+  $('reg-error').textContent = '';
+}
+
+// ── Dark mode ──
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  $('darkBtn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('lexilearn_dark', isDark ? '0' : '1');
+}
+(function initTheme() {
+  const d = localStorage.getItem('lexilearn_dark');
+  if (d === '1') { document.documentElement.setAttribute('data-theme', 'dark'); $('darkBtn').textContent = '☀️'; }
+})();
+
+// ── API call ──
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || '请求失败');
+  return data;
+}
+
+// ── Login ──
+async function doLogin() {
+  const email = $('login-email').value.trim();
+  const pwd = $('login-pwd').value;
+  const errorEl = $('login-error');
+  const btn = $('login-btn');
+  errorEl.textContent = '';
+
+  if (!email || !pwd) { errorEl.textContent = '请填写邮箱和密码'; return; }
+  btn.disabled = true; btn.textContent = '登录中...';
+
+  try {
+    const data = await apiPost('/auth/login', {email, password: pwd});
+    setToken(data.token);
+    window.location.href = 'Lexiword.html';
+  } catch (e) {
+    errorEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '登 录';
+  }
+}
+
+// ── Register ──
+async function doRegister() {
+  const email = $('reg-email').value.trim();
+  const nickname = $('reg-nickname').value.trim();
+  const pwd = $('reg-pwd').value;
+  const errorEl = $('reg-error');
+  const btn = $('reg-btn');
+  errorEl.textContent = '';
+
+  if (!email || !pwd) { errorEl.textContent = '请填写邮箱和密码'; return; }
+  if (pwd.length < 4) { errorEl.textContent = '密码至少4位'; return; }
+  btn.disabled = true; btn.textContent = '注册中...';
+
+  try {
+    await apiPost('/auth/register', {email, password: pwd, nickname});
+    errorEl.style.color = '#2E9E54';
+    errorEl.textContent = '注册成功！请登录';
+    setTimeout(() => switchTab('login'), 800);
+  } catch (e) {
+    errorEl.style.color = '#E05050';
+    errorEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '注 册';
+  }
+}
+
+// ── Keyboard shortcut ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab && activeTab.dataset.tab === 'login') doLogin();
+    else doRegister();
+  }
+});
+
+// ── Auto login check ──
+(async function() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(API_BASE + '/auth/me', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if (res.ok) window.location.href = 'Lexiword.html';
+    else clearToken();
+  } catch(e) {
+    // Backend unavailable, stay on login
+  }
+})();
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

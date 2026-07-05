@@ -1,0 +1,8 @@
+backend/
+deploy_backend/
+dist/
+generate_icons.py
+__pycache__/
+*.db
+node_modules/
+.DS_Store
