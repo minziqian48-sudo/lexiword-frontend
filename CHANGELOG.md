@@ -257,12 +257,34 @@ git checkout 9e96539 -- Lexiword.html login.html
 
 ---
 
+## 2026-07-06 · 修复 (commit: 3f33540)
+
+### 修复：切换账号列表显示 "undefined (当前)"
+
+**问题**：账号选择面板第一个条目显示 `undefined (当前)`，但实际登录的是 1@qq.com
+
+**根因**：
+1. `lexi_accounts` 中存入了一条 email 为空的坏数据（早期版本写入）
+2. `/api/auth/me` 返回的 user 对象在某些情况下缺少 email 字段
+3. `_getAccountList()` 和 `_saveAccountToList()` 都没做防御性过滤
+
+**改了什么**：
+| 改动 | 说明 |
+|------|------|
+| `_getAccountList()` | 过滤掉 `!email \|\| !token` 的无效记录 |
+| `_saveAccountToList()` | 入口校验，email/token 为空则不存 |
+| 启动代码 | 加载前先清理一次 `lexi_accounts` 坏数据 |
+| 启动代码 | 如果 `user.email` 为空，从已记住列表按 token 反查 |
+| `openAccountPicker()` | 判断当前账号时优先用 token 匹配 |
+
+**如何恢复**：`git checkout a3ec7fa -- Lexiword.html`
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
-| `d1442f8` | 07-06 | 第四轮：记住账号点选切换 |
-| `9e96539` | 07-06 | 第三轮：多账号切换+快照隔离 |
+| `3f33540` | 07-06 | 修复：切换账号 undefined |
+| `a3ec7fa` | 07-06 | 第四轮：记住账号点选切换 |
 | `d864b09` | 07-06 | 第二轮：恢复本地数据合并（补全数据类型） |
 | `e3dae30` | 07-06 | 第一轮：5 项修复（底部导航/遮罩/备份/首屏/数据隔离） |
 | `3bcd6ff` | 07-06 | 文档更新 |
