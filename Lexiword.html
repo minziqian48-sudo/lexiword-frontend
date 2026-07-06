@@ -3318,10 +3318,10 @@ function _saveAccountSnapshot(userId) {
 function _restoreAccountSnapshot(userId) {
   try {
     var raw = localStorage.getItem('lexi_snap_' + userId);
-    if (!raw) return;
+    if (!raw) { _clearLexiLocalStorage(true, true); return; } // 新账号无快照 → 清空残留旧数据
     var snap = JSON.parse(raw);
     var entries = Object.entries(snap);
-    if (!entries.length) return;
+    if (!entries.length) { _clearLexiLocalStorage(true, true); return; }
     // 先清空当前数据（保留 token 和账号列表），再全覆盖写入快照
     _clearLexiLocalStorage(true, true);
     var BATCH = 50, i = 0;
