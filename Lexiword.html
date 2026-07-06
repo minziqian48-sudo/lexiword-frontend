@@ -1138,8 +1138,8 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 </head>
 <body>
 
-<!-- ── 主体 ── -->
-<div id="page-area" class="page-area">
+<!-- ── SVG 精灵（隐藏） ── -->
+<div id="svg-sprite">
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <!-- flame: 打卡 -->
   <symbol id="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -1245,6 +1245,7 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
     <line x1="21" y1="12" x2="9" y2="12"/>
   </symbol>
 </svg>
+</div>
 <!-- ╚══ End SVG Sprite ══╝ -->
 
 
@@ -3315,7 +3316,7 @@ function _restoreAccountSnapshot(userId) {
   try {
     const raw = localStorage.getItem('lexi_snap_' + userId);
     if (!raw) return;
-    const snap = JSON.parse(snap);
+    const snap = JSON.parse(raw);
     const entries = Object.entries(snap);
     // 快照可能很大（几千条），分批写入避免阻塞主线程
     const BATCH = 50;
@@ -3498,30 +3499,48 @@ function _closeAllOverlays() {
       }
     }
   } catch(e) {}
+
+  // ── 安全网：3 秒超时强制渲染 UI ──
+  var _startupDone = false;
+  function _markStartupDone() {
+    if (_startupDone) return;
+    _startupDone = true;
+    _dataReady = true;
+  }
+  setTimeout(function() {
+    if (!_startupDone) {
+      console.warn('[LexiLearn] Startup timeout — forcing UI render');
+      _markStartupDone();
+      var v = localStorage.getItem('lexi_last_view') || 'checkin';
+      try { switchNav(v); } catch(e) { console.error('[LexiLearn] Force switchNav failed', e); }
+    }
+  }, 3000);
+
   apiFetch('GET', '/api/auth/me').then(user => {
     _currentUser = user;
     // 如果 API 返回的 user 没有 email，从记住的账号列表反查
     if (!user || !user.email) {
-      const token = getToken();
-      const list = _getAccountList();
-      const found = list.find(a => a.token === token);
+      var t = getToken();
+      var list = _getAccountList();
+      var found = list.find(function(a){ return a.token === t; });
       if (found) { user = user || {}; user.email = found.email; }
     }
     _currentUser = user;
     _tokenValid = true;
     // 记住该账号到列表（支持后续快速切换）
     _saveAccountToList(user.email, token);
-    // 先恢复该账号的快照数据（如果之前切换过账号）
+    // 恢复该账号的快照数据（如果之前切换过账号）
     _restoreAccountSnapshot(user.id);
     return initData();
-  }).then(() => {
-    // Kick off the original startup (default tab: checkin)
-    const initialView = localStorage.getItem('lexi_last_view') || 'checkin';
+  }).then(function() {
+    _markStartupDone();
+    var initialView = localStorage.getItem('lexi_last_view') || 'checkin';
     switchNav(initialView);
-  }).catch(() => {
-    // Token invalid or network error, fallback to localStorage
-    _restoreFromLocalStorage();
-    const initialView = localStorage.getItem('lexi_last_view') || 'checkin';
+  }).catch(function(err) {
+    console.warn('[LexiLearn] Startup fallback:', err);
+    _markStartupDone();
+    try { _restoreFromLocalStorage(); } catch(e2) {}
+    var initialView = localStorage.getItem('lexi_last_view') || 'checkin';
     switchNav(initialView);
   });
 })();
