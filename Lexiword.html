@@ -3318,6 +3318,17 @@ function _restoreAccountSnapshot(userId) {
   return new Promise(function(resolve) {
     try {
       var raw = localStorage.getItem('lexi_snap_' + userId);
+      // 回退查找：如果 numeric ID 没找到，从账号列表反查 email 键
+      if (!raw) {
+        var fallbackTok = getToken();
+        var fallbackList = _getAccountList();
+        var fallbackFound = fallbackList.find(function(a){ return a.token === fallbackTok; });
+        if (fallbackFound) {
+          var emailKey = 'lexi_snap_em_' + fallbackFound.email.replace(/[^a-zA-Z0-9@.]/g, '_');
+          raw = localStorage.getItem(emailKey);
+          if (raw) console.warn('[STARTUP] fallback snapshot found via email key: ' + emailKey + ' size=' + raw.length);
+        }
+      }
       console.log('[STARTUP] snapshot exists=' + !!raw + ' size=' + (raw ? raw.length : 0));
       if (!raw) {
         if (isSwitching) { console.log('[STARTUP] no snapshot, clearing'); _clearLexiLocalStorage(true, true); }
@@ -3331,26 +3342,32 @@ function _restoreAccountSnapshot(userId) {
         if (isSwitching) _clearLexiLocalStorage(true, true);
         resolve(); return;
       }
-      if (isSwitching) { console.log('[STARTUP] switching, clearing localStorage'); _clearLexiLocalStorage(true, true); }
-      else { console.log('[STARTUP] normal refresh, keeping localStorage'); }
-      var BATCH = 50, i = 0;
-      function writeBatch() {
-        var end = Math.min(i + BATCH, entries.length);
-        for (; i < end; i++) {
-          var k = entries[i][0], v = entries[i][1];
-          if (k === 'lexiword_token' || k === 'lexi_accounts') continue;
-          if (!isSwitching && localStorage.getItem(k)) continue;
-          localStorage.setItem(k, v);
+      if (isSwitching) {
+        console.log('[STARTUP] switching, clearing localStorage');
+        _clearLexiLocalStorage(true, true);
+        var BATCH = 50, bi = 0;
+        function writeBatch() {
+          var end = Math.min(bi + BATCH, entries.length);
+          for (; bi < end; bi++) {
+            var k = entries[bi][0], v = entries[bi][1];
+            if (k === 'lexiword_token' || k === 'lexi_accounts') continue;
+            localStorage.setItem(k, v);
+          }
+          if (bi < entries.length) {
+            setTimeout(writeBatch, 0);
+          } else {
+            console.log('[STARTUP] snapshot write complete (' + entries.length + ' entries), merging cache');
+            _mergeLocalStorageIntoCache();
+            resolve();
+          }
         }
-        if (i < entries.length) {
-          setTimeout(writeBatch, 0);
-        } else {
-          console.log('[STARTUP] snapshot write complete, merging cache');
-          _mergeLocalStorageIntoCache();
-          resolve();
-        }
+        writeBatch();
+      } else {
+        // 非切换模式：数据已在 localStorage 中，跳过空转的异步批量循环
+        console.log('[STARTUP] normal refresh, data in localStorage, merge cache directly');
+        _mergeLocalStorageIntoCache();
+        resolve();
       }
-      writeBatch();
     } catch(e) { console.error('[STARTUP] _restoreAccountSnapshot error:', e); resolve(); }
   });
 }
@@ -3463,7 +3480,30 @@ function closeAccountPicker() {
 
 // ── 切换到指定账号 ──
 function doSwitchToAccount(email, token) {
-  if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
+  console.log('[SWITCH] switch from _currentUser=', _currentUser, ' to email=', email);
+  // 保存当前账号快照
+  if (_currentUser && _currentUser.id) {
+    console.log('[SWITCH] saving snapshot for userId=' + _currentUser.id);
+    _saveAccountSnapshot(_currentUser.id);
+  } else {
+    console.warn('[SWITCH] _currentUser.id missing, trying to save via account list');
+  }
+  // 安全网：不管 _currentUser 是否可用，用当前 token 反查 email 再存一份快照
+  var curToken = getToken();
+  if (curToken) {
+    var list = _getAccountList();
+    var cur = list.find(function(a){ return a.token === curToken; });
+    if (cur) {
+      var emailSnapKey = 'lexi_snap_em_' + cur.email.replace(/[^a-zA-Z0-9@.]/g, '_');
+      try {
+        var snapData = _collectBackupData().data;
+        if (Object.keys(snapData).length > 0) {
+          localStorage.setItem(emailSnapKey, JSON.stringify(snapData));
+          console.log('[SWITCH] safety snapshot saved: ' + emailSnapKey + ' entries=' + Object.keys(snapData).length);
+        }
+      } catch(e) { console.error('[SWITCH] safety snapshot failed:', e); }
+    }
+  }
   _clearLexiLocalStorage(true, true);
   localStorage.setItem('lexiword_token', token);
   _saveAccountToList(email, token);
