@@ -1696,9 +1696,19 @@ async function apiFetch(method, path, body) {
     return res.json();
 }
 
-// 静默 fetch（不 throw、不跳转）
+// 静默 fetch（不 throw、不跳转，但记录错误到控制台）
+var _silentErrorLogged = {};
 async function apiFetchSilent(method, path, body) {
-    try { return await apiFetch(method, path, body); } catch(e) { return null; }
+    try { return await apiFetch(method, path, body); } catch(e) {
+        var key = method + path;
+        // 同样的错误 30s 内只打印一次，避免刷屏
+        var now = Date.now();
+        if (!_silentErrorLogged[key] || (now - _silentErrorLogged[key]) > 30000) {
+            _silentErrorLogged[key] = now;
+            console.warn('[API_SILENT] ' + method + ' ' + path + ' failed:', e.message || e);
+        }
+        return null;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
