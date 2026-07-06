@@ -5,6 +5,41 @@
 
 ---
 
+## 2026-07-06 · 第三轮 (commit: 9e96539)
+
+### ✨ 新功能：快速切换账号 + 数据隔离
+
+**需求**：底部"我的"面板增加"切换账号"，不同账号数据完全隔离，切回原账号数据不丢。
+
+**实现机制 — 按账号 ID 做 localStorage 快照**：
+
+```
+切换账号时：存快照 → 清临时数据 → 跳转登录
+登录时：    恢复快照 → API 加载 → 合并本地数据
+退出登录时：清除全部（包括快照）
+```
+
+**改了什么**：
+
+| 文件 | 位置 | 改动 |
+|------|------|------|
+| Lexiword.html | 变量 | 新增 `_currentUser` 存储当前用户信息 |
+| Lexiword.html | 新函数 | `_saveAccountSnapshot(userId)` — 把当前 localStorage 存为 `lexi_snap_{userId}` |
+| Lexiword.html | 新函数 | `_restoreAccountSnapshot(userId)` — 从快照恢复到 localStorage |
+| Lexiword.html | 新函数 | `_clearGenericData()` — 只清临时数据，保留快照 |
+| Lexiword.html | 新函数 | `doSwitchAccount()` — 切换账号入口 |
+| Lexiword.html | profile-sheet | 新增"切换账号"按钮，标题显示当前邮箱 |
+| Lexiword.html | `_processImport()` | 导入备份后：存快照 + 同步到后端 `/api/restore` |
+| Lexiword.html | 启动代码 | 先调 `/api/auth/me` 存 `_currentUser`，再 `_restoreAccountSnapshot` |
+| login.html | `doLogin()` | **移除** `clearOldAppData()` — 快照机制接管隔离 |
+
+**如何恢复**：
+```bash
+git checkout 83013c5 -- Lexiword.html login.html
+```
+
+---
+
 ## 2026-07-06 · 第二轮修复 (commit: d864b09)
 
 ### 恢复：导入备份后数据显示 + 合集可用
@@ -198,6 +233,7 @@ git checkout 3bcd6ff~ -- Lexiword.html login.html
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `9e96539` | 07-06 | 第三轮：多账号切换+快照隔离 |
 | `d864b09` | 07-06 | 第二轮：恢复本地数据合并（补全数据类型） |
 | `e3dae30` | 07-06 | 第一轮：5 项修复（底部导航/遮罩/备份/首屏/数据隔离） |
 | `3bcd6ff` | 07-06 | 文档更新 |
@@ -210,7 +246,10 @@ git checkout 3bcd6ff~ -- Lexiword.html login.html
 ```bash
 cd /d/project/Lexiword
 
-# 回退到本轮修改之前（7月6日6项优化之后）
+# 回退到快照机制之前（切换账号功能加入前）
+git checkout 83013c5 -- Lexiword.html login.html
+
+# 回退到本轮所有修改之前
 git checkout 3bcd6ff -- Lexiword.html login.html
 
 # 只回退某个文件到任意版本
