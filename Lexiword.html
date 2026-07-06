@@ -3480,8 +3480,7 @@ function _closeAllOverlays() {
   ['profile-sheet','account-picker','sidebar-overlay','backup-modal-overlay',
    'img-preview-overlay','ctx-menu'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) el.classList.remove('show');
-    if (el && el.style.display !== 'none') el.style.display = 'none';
+    if (el) { el.classList.remove('show'); el.style.display = ''; }
   });
 }
 
