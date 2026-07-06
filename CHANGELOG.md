@@ -418,10 +418,32 @@ setTimeout(function() {
 
 ---
 
+## 2026-07-06 · 修复 (commit: f67f5b9)
+
+### 修复：清数据后仍卡死 — 进一步排查
+
+**问题**：修复重复 `id="page-area"` 后，清数据重新登录仍然无法点击。
+
+**排查结果**：
+1. `#svg-sprite` 容器虽然包着 `display:none` 的 SVG，但**容器本身没有显式隐藏**，仍可能拦截触摸事件
+2. HBuilderX WebView 可能缓存了旧版页面
+
+**修复内容**：
+| 文件 | 改动 |
+|------|------|
+| `Lexiword.html` | `<div id="svg-sprite">` 改为 `<div id="svg-sprite" style="display:none">` |
+| `HBuilderX/index.html` | APP_URL 追加 `?_t=Date.now()` 破坏 WebView 缓存 |
+| `HBuilderX/index.html` | 添加 `Cache-Control: no-cache, no-store, must-revalidate` 等 meta |
+
+**注意**：HBuilderX `index.html` 修改后**必须重新云打包 APK** 才能生效。
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `f67f5b9` | 07-06 | 修复：svg-sprite 显式 display:none + HBuilderX 缓存破坏 |
 | `0771fb5` | 07-06 | 🔴 修复：清数据后卡死（重复page-area ID）+ 快照恢复bug + 启动安全网 |
 | `f6fa1b4` | 07-06 | 修复：切换卡死 + 登录页闪现 |
 | `3f33540` | 07-06 | 修复：切换账号 undefined |
