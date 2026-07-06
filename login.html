@@ -143,9 +143,10 @@ function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 // 登录前清除所有 LexiLearn 旧数据，防止账号间数据泄露
 function clearOldAppData() {
   const prefixes = ['lexi_','wrev3_','checkin_'];
+  const keep = ['lexiword_token','lexi_accounts'];
   for(let i=localStorage.length-1;i>=0;i--){
     const k=localStorage.key(i);
-    if(k && prefixes.some(p=>k.startsWith(p))){
+    if(k && prefixes.some(p=>k.startsWith(p)) && !keep.includes(k)){
       localStorage.removeItem(k);
     }
   }
