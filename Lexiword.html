@@ -3318,27 +3318,37 @@ function _saveAccountSnapshot(userId) {
 }
 
 function _restoreAccountSnapshot(userId) {
+  // 检查是否正在切换账号。普通刷新（含导入数据后刷新）不清空，保留数据
+  var isSwitching = localStorage.getItem('lexi_switching') === '1';
+  localStorage.removeItem('lexi_switching');
+
   return new Promise(function(resolve) {
     try {
       var raw = localStorage.getItem('lexi_snap_' + userId);
-      if (!raw) { _clearLexiLocalStorage(true, true); resolve(); return; }
+      if (!raw) {
+        if (isSwitching) _clearLexiLocalStorage(true, true);
+        resolve(); return;
+      }
       var snap = JSON.parse(raw);
       var entries = Object.entries(snap);
-      if (!entries.length) { _clearLexiLocalStorage(true, true); resolve(); return; }
-      // 先清空当前数据（保留 token 和账号列表），再全覆盖写入快照
-      _clearLexiLocalStorage(true, true);
+      if (!entries.length) {
+        if (isSwitching) _clearLexiLocalStorage(true, true);
+        resolve(); return;
+      }
+      // 切换账号：清空再恢复；普通刷新：保留现有数据
+      if (isSwitching) _clearLexiLocalStorage(true, true);
       var BATCH = 50, i = 0;
       function writeBatch() {
         var end = Math.min(i + BATCH, entries.length);
         for (; i < end; i++) {
           var k = entries[i][0], v = entries[i][1];
           if (k === 'lexiword_token' || k === 'lexi_accounts') continue;
+          if (!isSwitching && localStorage.getItem(k)) continue;
           localStorage.setItem(k, v);
         }
         if (i < entries.length) {
           setTimeout(writeBatch, 0);
         } else {
-          // 全部写入完成，合并进缓存然后 resolve
           _mergeLocalStorageIntoCache();
           resolve();
         }
@@ -3456,15 +3466,12 @@ function closeAccountPicker() {
 
 // ── 切换到指定账号 ──
 function doSwitchToAccount(email, token) {
-  // 保存当前账号快照（如果已登录）
   if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
-  // 彻底清空所有 LexiLearn 数据（保留 token 和账号列表）
   _clearLexiLocalStorage(true, true);
-  // 设置新 token
   localStorage.setItem('lexiword_token', token);
-  // 更新最后登录时间
   _saveAccountToList(email, token);
-  // 关闭面板，刷新页面从 API 重新拉数据
+  // 标记"切换账号中"，启动时不重复清空
+  localStorage.setItem('lexi_switching', '1');
   closeAccountPicker();
   window.location.reload();
 }
@@ -3472,8 +3479,9 @@ function doSwitchToAccount(email, token) {
 // ── 登录其他账号 ──
 function doLoginOther() {
   if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
-  _clearLexiLocalStorage(false, true); // 不留 token
+  _clearLexiLocalStorage(false, true);
   localStorage.removeItem('lexiword_token');
+  localStorage.setItem('lexi_switching', '1');
   window.location.href = 'login.html';
 }
 
