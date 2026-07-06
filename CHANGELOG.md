@@ -462,10 +462,45 @@ setTimeout(function() {
 
 ---
 
+## 2026-07-06 · 修复 (commit: b5e08fe)
+
+### 修复：主脚本块语法错误导致所有函数未定义
+
+**问题**：用浏览器清数据登录后仍然卡住，调试面板报错 `switchNav is not defined`、`openProfileSheet is not defined`。根因是主 `<script>` 块存在语法错误，导致整个脚本块无法执行，所有全局函数都没有被定义。
+
+**根因**：`_saveAccountToList` 函数结束后残留了重复的代码行和多余的右花括号：
+
+```javascript
+function _saveAccountToList(email, token) {
+  ...
+  localStorage.setItem('lexi_accounts', JSON.stringify(list));
+}
+  localStorage.setItem('lexi_accounts', JSON.stringify(list));  // ← 多余
+}                                                              // ← 多余
+function _removeAccount(email) { ... }
+```
+
+**修复内容**：
+
+| 文件 | 改动 |
+|------|------|
+| `Lexiword.html` | 删除 `_saveAccountToList` 后的重复代码和多余 `}`，修复语法错误 |
+| `Lexiword.html` | 用 `node --check` 验证主脚本块语法通过 |
+
+**影响范围**：该语法错误导致整个主 JS 块无法执行，因此 `switchNav`、`openProfileSheet`、`initData`、API 封装等全部失效，页面只能显示静态 HTML，所有点击无响应。
+
+**回滚**：如需回滚，使用前一个 commit：
+```bash
+git checkout dd18ca8 -- Lexiword.html
+```
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `b5e08fe` | 07-06 | 修复：主脚本块语法错误导致所有函数未定义 |
 | `dd18ca8` | 07-06 | 修复：浏览器也卡死 — 全面缓存破坏 + 调试面板 + SW v4 |
 | `f67f5b9` | 07-06 | 修复：svg-sprite 显式 display:none + HBuilderX 缓存破坏 |
 | `0771fb5` | 07-06 | 🔴 修复：清数据后卡死（重复page-area ID）+ 快照恢复bug + 启动安全网 |
