@@ -5,6 +5,51 @@
 
 ---
 
+## 2026-07-06 · 第四轮 (commit: e07102b) 🔴 根因修复
+
+### 🔴 修复：导入数据丢失（根本原因）
+
+**问题**：导入备份后刷新页面，签到记录、生词本、书签、访问天数等数据消失。
+
+**根因分析**：
+
+`_mergeLocalStorageIntoCache()` 函数中，结构化数据的合并逻辑有严重缺陷：
+
+```javascript
+// ❌ 旧代码 — 有问题的逻辑
+if(!Object.keys(localCache.checkin).length){  // 仅当 API 返回空时才合入！
+  const ci=JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
+  if(Object.keys(ci).length) localCache.checkin = ci;
+}
+```
+
+**数据流追踪**：
+1. `_processImport()` 正确写入 localStorage ✅
+2. 页面刷新 → `initData()` 从后端 API 获取数据
+3. **后端返回哪怕一条数据** → `localCache.checkin` 非空
+4. 条件判断为 false → **localStorage 中完整的导入数据被完全忽略** ❌
+
+`states` 和 `starred` 无此问题（它们无条件覆盖），但 `checkin/sets/pins/bookmark/visitDays` 全部受影响。
+
+**修复**：
+```javascript
+// ✅ 新代码 — localStorage 始终优先
+const ci=JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
+if(Object.keys(ci).length) localCache.checkin = ci;
+// 不再检查 API 是否为空，本地有数据就用本地的
+```
+
+| 文件 | 改动 |
+|------|------|
+| Lexiword.html | `_mergeLocalStorageIntoCache()` 移除所有 `!empty` 条件，改为始终从 localStorage 合并 |
+
+**如何恢复此修改**：
+```bash
+git checkout f5af281 -- Lexiword.html
+```
+
+---
+
 ## 2026-07-06 · 第三轮 (commit: 9e96539)
 
 ### ✨ 新功能：快速切换账号 + 数据隔离
