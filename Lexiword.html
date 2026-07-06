@@ -3315,28 +3315,45 @@ function _restoreAccountSnapshot(userId) {
   try {
     const raw = localStorage.getItem('lexi_snap_' + userId);
     if (!raw) return;
-    const snap = JSON.parse(raw);
-    let count = 0;
-    for (const [k, v] of Object.entries(snap)) {
-      if (!localStorage.getItem(k)) {
-        localStorage.setItem(k, v);
-        count++;
+    const snap = JSON.parse(snap);
+    const entries = Object.entries(snap);
+    // 快照可能很大（几千条），分批写入避免阻塞主线程
+    const BATCH = 50;
+    let i = 0;
+    function writeBatch() {
+      const end = Math.min(i + BATCH, entries.length);
+      let wrote = false;
+      for (; i < end; i++) {
+        const [k, v] = entries[i];
+        if (!localStorage.getItem(k)) { localStorage.setItem(k, v); wrote = true; }
+      }
+      if (i < entries.length) {
+        setTimeout(writeBatch, 0); // 让出主线程，不阻塞 UI
+      } else if (wrote) {
+        setTimeout(function() { _mergeLocalStorageIntoCache(); }, 50);
       }
     }
-    if (count > 0) _mergeLocalStorageIntoCache();
+    writeBatch();
   } catch(e) {}
 }
 
 function _clearGenericData() {
   const prefixes = ['lexi_db_','wrev3_star_','lexi_ci_v1','lexi_sets_v1','lexi_pin_v1','lexi_vocab_bookmark_v1','lexi_visit_v1'];
+  // 分批删除，避免大量数据时阻塞主线程
+  var keysToRemove = [];
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const k = localStorage.key(i);
     if (k && prefixes.some(p => k.startsWith(p))) {
-      localStorage.removeItem(k);
+      keysToRemove.push(k);
     }
   }
-  // Also clear the _user tracking
-  localStorage.removeItem('lexi_last_user');
+  function removeBatch(start) {
+    const end = Math.min(start + 30, keysToRemove.length);
+    for (let j = start; j < end; j++) { localStorage.removeItem(keysToRemove[j]); }
+    if (end < keysToRemove.length) { setTimeout(function(){ removeBatch(end); }, 0); }
+    else { localStorage.removeItem('lexi_last_user'); }
+  }
+  if (keysToRemove.length > 0) removeBatch(0);
 }
 
 // ── 记住的账号列表 ──
@@ -3456,8 +3473,19 @@ function closeProfileSheet() {
   if (sheet) sheet.classList.remove('show');
 }
 
+// ── 启动安全网：关闭所有可能残留的遮罩 ──
+function _closeAllOverlays() {
+  ['profile-sheet','account-picker','sidebar-overlay','backup-modal-overlay',
+   'img-preview-overlay','ctx-menu'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+    if (el && el.style.display !== 'none') el.style.display = 'none';
+  });
+}
+
 // ── Startup: validate token, load data ──
 (function(){
+  _closeAllOverlays(); // 确保无遮罩残留
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
   // 一次性清理：删除 lexi_accounts 中的无效条目
