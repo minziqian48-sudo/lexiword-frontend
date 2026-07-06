@@ -2958,31 +2958,36 @@ function doImportPaste(){
 }
 
 function _processImport(text){
-  const info=document.getElementById('backup-import-info');
-  let data;
-  try{
-    data=JSON.parse(text);
-  }catch(e){
-    _setImportInfo('❌ JSON格式错误，请检查内容','#e74c3c');
-    return;
-  }
-  const prefixes=['wrev3_','lexi_','checkin_'];
-  const entries=Object.entries(data).filter(([k])=>k&&prefixes.some(p=>k.startsWith(p)));
-  if(!entries.length){_setImportInfo('❌ 未找到有效的备份数据','#e74c3c');return;}
-  entries.forEach(([k,v])=>localStorage.setItem(k,v));
-  // 同步导入数据到后端（防止切换账号后丢失）
+  var info=document.getElementById('backup-import-info');
+  var data;
+  try{ data=JSON.parse(text); }catch(e){ _setImportInfo('JSON格式错误','#e74c3c'); return; }
+  var prefixes=['wrev3_','lexi_','checkin_'];
+  var entries=Object.entries(data).filter(function(e){ var k=e[0]; return k&&prefixes.some(function(p){ return k.indexOf(p)===0; }); });
+  if(!entries.length){ _setImportInfo('未找到有效的备份数据','#e74c3c'); return; }
+  console.log('[IMPORT] writing', entries.length, 'entries, first keys:', entries.slice(0,3).map(function(e){ return e[0]; }));
+  entries.forEach(function(e){ localStorage.setItem(e[0], e[1]); });
+  // Verify written
+  var verifyCount = 0;
+  for(var vi=0;vi<localStorage.length;vi++){ var vk=localStorage.key(vi); if(vk&&prefixes.some(function(p){ return vk.indexOf(p)===0; })) verifyCount++; }
+  console.log('[IMPORT] localStorage now has', verifyCount, 'matching keys');
+
   try {
-    const backupData = {};
-    entries.forEach(([k,v]) => backupData[k] = v);
+    var backupData = {};
+    entries.forEach(function(e){ backupData[e[0]] = e[1]; });
     if (_currentUser && _currentUser.id) {
+      console.log('[IMPORT] saving snapshot for user', _currentUser.id);
       _saveAccountSnapshot(_currentUser.id);
+      var snapCheck = localStorage.getItem('lexi_snap_' + _currentUser.id);
+      console.log('[IMPORT] snapshot size:', snapCheck ? snapCheck.length : 0, 'chars');
       apiFetchSilent('POST', '/api/restore', {data: backupData});
+    } else {
+      console.warn('[IMPORT] _currentUser or id missing, snapshot NOT saved!', _currentUser);
     }
-  } catch(e) {}
+  } catch(e) { console.error('[IMPORT] save snapshot error:', e); }
   if(typeof invalidateVocabCache==='function')invalidateVocabCache();
-  _setImportInfo('✅ 成功导入 '+entries.length+' 条数据！页面将刷新…','#27ae60');
-  showToast('✅ 导入成功！正在刷新…');
-  setTimeout(()=>location.reload(),1500);
+  _setImportInfo('成功导入 '+entries.length+' 条数据！页面将刷新…','#27ae60');
+  showToast('导入成功！正在刷新…');
+  setTimeout(function(){ location.reload(); }, 1500);
 }
 
 function _setImportInfo(msg,color){
@@ -3213,6 +3218,7 @@ async function initData() {
       apiFetch('GET', '/api/pins'),
       apiFetch('GET', '/api/bookmark'),
     ]);
+    console.log('[STARTUP] initData API response: states=' + Object.keys(states.states||{}).length + ' starred=' + (states.starred||[]).length + ' sets=' + (sets||[]).length);
     localCache.states = states.states || {};
     localCache.starred = states.starred || [];
     localCache.visitDays = states.visit_days || {};
@@ -3220,8 +3226,9 @@ async function initData() {
     localCache.sets = sets || [];
     localCache.pins = pins || {};
     localCache.bookmark = bookmark.word || '';
-    // 合并本地数据（导入备份、离线创建等）。退出登录/切号已清理旧数据，不会串号。
+    console.log('[STARTUP] localCache before merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
     _mergeLocalStorageIntoCache();
+    console.log('[STARTUP] localCache after merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
@@ -3262,30 +3269,24 @@ function _restoreFromLocalStorage() {
 }
 
 function _mergeLocalStorageIntoCache() {
-  // Merge imported backup data (lexi_db_* keys) into API-loaded state cache
-  // Supports both old format (lexi_db_1_word) and new format (lexi_db_1:word)
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(k && k.startsWith('lexi_db_')){
-      let key=k.slice(8); // remove 'lexi_db_' prefix
-      // Convert old backup format: 1_word → 1:word
-      if(key.indexOf(':')<0){
-        const firstUnderscore=key.indexOf('_');
-        if(firstUnderscore>0){
-          key=key.slice(0,firstUnderscore)+':'+key.slice(firstUnderscore+1);
-        }
-      }
+  var stateCount=0, starCount=0;
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k && k.indexOf('lexi_db_')===0){
+      var key=k.slice(8);
+      if(key.indexOf(':')<0){ var us=key.indexOf('_'); if(us>0) key=key.slice(0,us)+':'+key.slice(us+1); }
       localCache.states[key]=parseInt(localStorage.getItem(k)||'0');
+      stateCount++;
     }
   }
-  // Merge starred words from backup (wrev3_star_* keys)
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(k && k.startsWith('wrev3_star_') && localStorage.getItem(k)==='1'){
-      const w=k.slice(11);
-      if(!localCache.starred.includes(w))localCache.starred.push(w);
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k && k.indexOf('wrev3_star_')===0 && localStorage.getItem(k)==='1'){
+      var w=k.slice(11);
+      if(localCache.starred.indexOf(w)<0){ localCache.starred.push(w); starCount++; }
     }
   }
+  console.log('[MERGE] merged ' + stateCount + ' states, ' + starCount + ' starred from localStorage');
   // Merge structured data: checkin, sets, pins, bookmark, visitDays
   try {
     if(!Object.keys(localCache.checkin).length){
@@ -3318,25 +3319,28 @@ function _saveAccountSnapshot(userId) {
 }
 
 function _restoreAccountSnapshot(userId) {
-  // 检查是否正在切换账号。普通刷新（含导入数据后刷新）不清空，保留数据
   var isSwitching = localStorage.getItem('lexi_switching') === '1';
   localStorage.removeItem('lexi_switching');
+  console.log('[STARTUP] _restoreAccountSnapshot userId=' + userId + ' switching=' + isSwitching);
 
   return new Promise(function(resolve) {
     try {
       var raw = localStorage.getItem('lexi_snap_' + userId);
+      console.log('[STARTUP] snapshot exists=' + !!raw + ' size=' + (raw ? raw.length : 0));
       if (!raw) {
-        if (isSwitching) _clearLexiLocalStorage(true, true);
+        if (isSwitching) { console.log('[STARTUP] no snapshot, clearing'); _clearLexiLocalStorage(true, true); }
+        console.log('[STARTUP] resolve (no snapshot)');
         resolve(); return;
       }
       var snap = JSON.parse(raw);
       var entries = Object.entries(snap);
+      console.log('[STARTUP] snapshot entries=' + entries.length + ' first3=' + JSON.stringify(entries.slice(0,3).map(function(e){ return e[0]; })));
       if (!entries.length) {
         if (isSwitching) _clearLexiLocalStorage(true, true);
         resolve(); return;
       }
-      // 切换账号：清空再恢复；普通刷新：保留现有数据
-      if (isSwitching) _clearLexiLocalStorage(true, true);
+      if (isSwitching) { console.log('[STARTUP] switching, clearing localStorage'); _clearLexiLocalStorage(true, true); }
+      else { console.log('[STARTUP] normal refresh, keeping localStorage'); }
       var BATCH = 50, i = 0;
       function writeBatch() {
         var end = Math.min(i + BATCH, entries.length);
@@ -3349,12 +3353,13 @@ function _restoreAccountSnapshot(userId) {
         if (i < entries.length) {
           setTimeout(writeBatch, 0);
         } else {
+          console.log('[STARTUP] snapshot write complete, merging cache');
           _mergeLocalStorageIntoCache();
           resolve();
         }
       }
       writeBatch();
-    } catch(e) { resolve(); }
+    } catch(e) { console.error('[STARTUP] _restoreAccountSnapshot error:', e); resolve(); }
   });
 }
 
