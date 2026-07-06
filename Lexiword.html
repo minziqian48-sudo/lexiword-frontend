@@ -1757,7 +1757,7 @@ function dbGetState(day, word) {
 function dbSetState(day, word, s) {
   const key = day + ':' + word;
   localCache.states[key] = parseInt(s);
-  apiFetchSilent('PUT', '/api/states/'+day+'/'+encodeURIComponent(word), {state:s});
+  apiFetchSilent('PUT', '/states/'+day+'/'+encodeURIComponent(word), {state:s});
 }
 function dbCycleState(day, word) {
   const n = DB_CYCLE[dbGetState(day, word)] || 0;
@@ -1878,7 +1878,7 @@ else document.addEventListener('plusready', bindPlusBackButton, false);
 ═══════════════════════════════════════════════════════ */
 const CI_KEY = 'lexi_ci_v1';
 const ciData = () => localCache.checkin;
-const ciSave = d => { localCache.checkin = d; apiFetchSilent('POST', '/api/checkin'); };
+const ciSave = d => { localCache.checkin = d; apiFetchSilent('POST', '/checkin'); };
 let _ciYear = new Date().getFullYear(), _ciMonth = new Date().getMonth();
 
 function ciTodayKey() {
@@ -2291,7 +2291,7 @@ function renderVocabGrid(){
       const nowStarred=localCache.starred.includes(w);
       const next=!nowStarred;
       if(next) localCache.starred.push(w); else localCache.starred=localCache.starred.filter(x=>x!==w);
-      apiFetchSilent('PUT','/api/star/'+encodeURIComponent(w),{starred:next});
+      apiFetchSilent('PUT','/star/'+encodeURIComponent(w),{starred:next});
       if(next) _vocabStarCache[w]=true; else delete _vocabStarCache[w];
       card.dataset.starred=next?'1':'';
       const starBtn=card.querySelector('.db-star-btn');
@@ -2433,7 +2433,7 @@ function saveSets(s){
   localCache.sets=s;
   // 本地持久化兜底：即使后端失败，数据也不会丢
   try { localStorage.setItem(SETS_KEY, JSON.stringify(s)); } catch(e){}
-  apiFetchSilent('POST','/api/sets/sync',{sets:s});
+  apiFetchSilent('POST','/sets/sync',{sets:s});
 }
 let _editingSetId=null;
 
@@ -2599,7 +2599,7 @@ function toggleStar(card){
   if(next) localCache.starred.push(w);
   else localCache.starred=localCache.starred.filter(x=>x!==w);
   card.dataset.starred=next?'1':'';
-  apiFetchSilent('PUT','/api/star/'+encodeURIComponent(w),{starred:next});
+  apiFetchSilent('PUT','/star/'+encodeURIComponent(w),{starred:next});
   const btn=card.querySelector('.db-star-btn'); if(!btn)return;
   btn.classList.toggle('starred',next);
   const svg=btn.querySelector('svg');
@@ -2666,7 +2666,7 @@ function ctxToggleStar(){
     const wasStarred=localCache.starred.includes(_ctxWord);
     if(wasStarred) localCache.starred=localCache.starred.filter(x=>x!==_ctxWord);
     else localCache.starred.push(_ctxWord);
-    apiFetchSilent('PUT','/api/star/'+encodeURIComponent(_ctxWord),{starred:!wasStarred});
+    apiFetchSilent('PUT','/star/'+encodeURIComponent(_ctxWord),{starred:!wasStarred});
   }
   hideCtxMenu();
 }
@@ -2677,7 +2677,7 @@ function ctxSetState(state){
       dbSetState(d,_ctxWord,state);
     }
   }
-  apiFetchSilent('PUT','/api/states/batch',{word:_ctxWord,state});
+  apiFetchSilent('PUT','/states/batch',{word:_ctxWord,state});
   document.querySelectorAll(`.word-card[data-word="${_ctxWord}"]`).forEach(c=>{
     c.dataset.state=state; flashCard(c,state);
   });
@@ -2842,7 +2842,7 @@ function confirmBatchAdd(){
 ═══════════════════════════════════════════════════════ */
 const PIN_KEY='lexi_pin_v1';
 function getPins(){ return localCache.pins; }
-function savePins(p){ localCache.pins=p; apiFetchSilent('PUT','/api/pins',{pins:p}); }
+function savePins(p){ localCache.pins=p; apiFetchSilent('PUT','/pins',{pins:p}); }
 function togglePin(gridId,afterWord){
   const pins=getPins(); const key=gridId+':'+afterWord;
   if(pins[key])delete pins[key]; else pins[key]=1;
@@ -2989,7 +2989,7 @@ function _processImport(text){
       _saveAccountSnapshot(_currentUser.id);
       var snapCheck = localStorage.getItem('lexi_snap_' + _currentUser.id);
       console.log('[IMPORT] snapshot size:', snapCheck ? snapCheck.length : 0, 'chars');
-      apiFetchSilent('POST', '/api/restore', {data: backupData});
+      apiFetchSilent('POST', '/restore', {data: backupData});
     } else {
       console.warn('[IMPORT] _currentUser or id missing, snapshot NOT saved!', _currentUser);
     }
@@ -3222,11 +3222,11 @@ async function initData() {
   if (!token) { window.location.href = 'login.html'; return; }
   try {
     const [states, checkin, sets, pins, bookmark] = await Promise.all([
-      apiFetch('GET', '/api/states'),
-      apiFetch('GET', '/api/checkin'),
-      apiFetch('GET', '/api/sets'),
-      apiFetch('GET', '/api/pins'),
-      apiFetch('GET', '/api/bookmark'),
+      apiFetch('GET', '/states'),
+      apiFetch('GET', '/checkin'),
+      apiFetch('GET', '/sets'),
+      apiFetch('GET', '/pins'),
+      apiFetch('GET', '/bookmark'),
     ]);
     console.log('[STARTUP] initData API response: states=' + Object.keys(states.states||{}).length + ' starred=' + (states.starred||[]).length + ' sets=' + (sets||[]).length);
     localCache.states = states.states || {};
@@ -3601,7 +3601,7 @@ function _closeAllOverlays() {
     }
   }, 3000);
 
-  apiFetch('GET', '/api/auth/me').then(user => {
+  apiFetch('GET', '/auth/me').then(user => {
     _currentUser = user;
     // 如果 API 返回的 user 没有 email，从记住的账号列表反查
     if (!user || !user.email) {
@@ -3670,7 +3670,7 @@ function _closeAllOverlays() {
   function getBookmark(){ return localCache.bookmark; }
   function setBookmark(word){
     localCache.bookmark=word||'';
-    apiFetchSilent('PUT','/api/bookmark',{word:word||''});
+    apiFetchSilent('PUT','/bookmark',{word:word||''});
   }
   function findCard(word){
     return Array.from(document.querySelectorAll('#vocab-grid .word-card')).find(card=>card.dataset.word===word)||null;
