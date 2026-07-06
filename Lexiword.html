@@ -3187,7 +3187,8 @@ async function initData() {
     localCache.sets = sets || [];
     localCache.pins = pins || {};
     localCache.bookmark = bookmark.word || '';
-    // 注意：不再用 localStorage 兜底 — 后端返回空=用户确实没有数据，不同账号数据必须隔离
+    // 合并本地数据（导入备份、离线创建等）。退出登录/切号已清理旧数据，不会串号。
+    _mergeLocalStorageIntoCache();
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
@@ -3252,10 +3253,28 @@ function _mergeLocalStorageIntoCache() {
       if(!localCache.starred.includes(w))localCache.starred.push(w);
     }
   }
-  // Merge visit days and other structured data
+  // Merge structured data: checkin, sets, pins, bookmark, visitDays
   try {
-    const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
-    Object.assign(localCache.visitDays, vd);
+    if(!Object.keys(localCache.checkin).length){
+      const ci=JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
+      if(Object.keys(ci).length) localCache.checkin = ci;
+    }
+    if(!localCache.sets.length){
+      const ss=JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]');
+      if(ss.length) localCache.sets = ss;
+    }
+    if(!Object.keys(localCache.pins).length){
+      const pp=JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}');
+      if(Object.keys(pp).length) localCache.pins = pp;
+    }
+    if(!localCache.bookmark){
+      const bm=localStorage.getItem('lexi_vocab_bookmark_v1');
+      if(bm) localCache.bookmark = bm;
+    }
+    if(!Object.keys(localCache.visitDays).length){
+      const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
+      if(Object.keys(vd).length) localCache.visitDays = vd;
+    }
   } catch(e){}
 }
 
