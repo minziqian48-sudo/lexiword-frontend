@@ -1687,6 +1687,8 @@ let _dataReady = false, _useRemote = false, _tokenValid = false, _currentUser = 
 
 // 通用 fetch 封装（自动携带 Token、401 跳转）
 async function apiFetch(method, path, body) {
+    // 兼容 CDN 旧版缓存：如果路径已含 /api 前缀则去掉
+    if (path.indexOf('/api/') === 0) path = path.substring(4);
     const token = getToken();
     const opts = { method, headers: {'Content-Type':'application/json'} };
     if (token) opts.headers['Authorization'] = 'Bearer ' + token;
