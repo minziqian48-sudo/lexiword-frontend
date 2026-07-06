@@ -3287,29 +3287,21 @@ function _mergeLocalStorageIntoCache() {
     }
   }
   console.log('[MERGE] merged ' + stateCount + ' states, ' + starCount + ' starred from localStorage');
-  // Merge structured data: checkin, sets, pins, bookmark, visitDays
+  // Merge structured data: localStorage 始终优先（导入的数据在本地）
+  // 不再判断 API 是否为空，只要 localStorage 有数据就用本地的
   try {
-    if(!Object.keys(localCache.checkin).length){
-      const ci=JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
-      if(Object.keys(ci).length) localCache.checkin = ci;
-    }
-    if(!localCache.sets.length){
-      const ss=JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]');
-      if(ss.length) localCache.sets = ss;
-    }
-    if(!Object.keys(localCache.pins).length){
-      const pp=JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}');
-      if(Object.keys(pp).length) localCache.pins = pp;
-    }
-    if(!localCache.bookmark){
-      const bm=localStorage.getItem('lexi_vocab_bookmark_v1');
-      if(bm) localCache.bookmark = bm;
-    }
-    if(!Object.keys(localCache.visitDays).length){
-      const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
-      if(Object.keys(vd).length) localCache.visitDays = vd;
-    }
-  } catch(e){}
+    const ci=JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
+    if(Object.keys(ci).length) localCache.checkin = ci;
+    const ss=JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]');
+    if(ss.length) localCache.sets = ss;
+    const pp=JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}');
+    if(Object.keys(pp).length) localCache.pins = pp;
+    const bm=localStorage.getItem('lexi_vocab_bookmark_v1');
+    if(bm) localCache.bookmark = bm;
+    const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
+    if(Object.keys(vd).length) localCache.visitDays = vd;
+    console.log('[MERGE] structured: checkin=' + Object.keys(localCache.checkin).length + ' sets=' + localCache.sets.length + ' pins=' + Object.keys(localCache.pins).length + ' visitDays=' + Object.keys(localCache.visitDays).length);
+  } catch(e){ console.error('[MERGE] structured merge error:', e); }
 }
 
 // ── 账号快照：按 user ID 保存/恢复 localStorage ──
