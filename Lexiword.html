@@ -3322,6 +3322,13 @@ function _saveAccountSnapshot(userId) {
 
 function _restoreAccountSnapshot(userId) {
   var isSwitching = localStorage.getItem('lexi_switching') === '1';
+  // ★ 防御：检测上次登录用户是否变化，不同则强制走切换模式
+  var lastUser = localStorage.getItem('lexi_last_user');
+  if (!isSwitching && lastUser && lastUser !== String(userId)) {
+    console.warn('[STARTUP] user changed without switching flag, forcing clear');
+    isSwitching = true;
+  }
+  localStorage.setItem('lexi_last_user', String(userId));
   localStorage.removeItem('lexi_switching');
   console.log('[STARTUP] _restoreAccountSnapshot userId=' + userId + ' switching=' + isSwitching);
 
