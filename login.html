@@ -82,6 +82,8 @@ body{
 </style>
 </head>
 <body>
+<!-- 自动登录：有 token 立刻跳转，不等网络，避免登录页闪现 -->
+<script>var t=localStorage.getItem('lexiword_token');if(t)location.replace('Lexiword.html?_t='+Date.now());</script>
 <div class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙</div>
 <div class="auth-card">
   <div class="logo">
@@ -247,21 +249,6 @@ document.addEventListener('keydown', e => {
     else doRegister();
   }
 });
-
-// ── Auto login check ──
-(async function() {
-  const token = getToken();
-  if (!token) return;
-  try {
-    const res = await fetch(API_BASE + '/auth/me', {
-      headers: {'Authorization': 'Bearer ' + token}
-    });
-    if (res.ok) window.location.href = 'Lexiword.html?_t=' + Date.now();
-    else clearToken();
-  } catch(e) {
-    // Backend unavailable, stay on login
-  }
-})();
 
 // ── PWA Service Worker ──
 if ('serviceWorker' in navigator) {
