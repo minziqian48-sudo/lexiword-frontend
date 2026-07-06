@@ -3080,6 +3080,8 @@ async function initData() {
     localCache.sets = sets || [];
     localCache.pins = pins || {};
     localCache.bookmark = bookmark.word || '';
+    // Merge localStorage backup data (takes priority over empty backend)
+    _mergeLocalStorageIntoCache();
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
@@ -3110,6 +3112,24 @@ function _restoreFromLocalStorage() {
   try { localCache.pins = JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}'); } catch(e) {}
   localCache.bookmark = localStorage.getItem('lexi_vocab_bookmark_v1')||'';
   _dataReady = true;
+}
+
+function _mergeLocalStorageIntoCache() {
+  // Merge imported backup data (lexi_db_* keys) into API-loaded state cache
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.startsWith('lexi_db_')){
+      localCache.states[k.slice(8)] = parseInt(localStorage.getItem(k)||'0');
+    }
+  }
+  // Merge starred words from backup (wrev3_star_* keys)
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.startsWith('wrev3_star_') && localStorage.getItem(k)==='1'){
+      const w = k.slice(11);
+      if(!localCache.starred.includes(w)) localCache.starred.push(w);
+    }
+  }
 }
 
 // ── Logout ──
