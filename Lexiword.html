@@ -1760,7 +1760,13 @@ function dbGetState(day, word) {
 function dbSetState(day, word, s) {
   const key = day + ':' + word;
   localCache.states[key] = parseInt(s);
-  apiFetchSilent('PUT', '/states/'+day+'/'+encodeURIComponent(word), {state:s});
+  // 改用有反馈的 API 调用，失败时显示 toast
+  apiFetchSilent('PUT', '/states/'+day+'/'+encodeURIComponent(word), {state:s})
+    .then(function() { /* 成功：静默即可，UI 已通过 flashCard 反馈 */ })
+    .catch(function(err) {
+      console.warn('[STATE] save failed for', word, ':', err);
+      showToast('⚠️ 状态保存失败，请检查网络', 2500);
+    });
 }
 function dbCycleState(day, word) {
   const n = DB_CYCLE[dbGetState(day, word)] || 0;
@@ -3319,8 +3325,36 @@ function _mergeLocalStorageIntoCache() {
 
 // ── 账号快照：按 user ID 保存/恢复 localStorage ──
 function _saveAccountSnapshot(userId) {
-  const snap = _collectBackupData().data;
-  localStorage.setItem('lexi_snap_' + userId, JSON.stringify(snap));
+  try {
+    const snap = _collectBackupData().data;
+    const json = JSON.stringify(snap);
+    localStorage.setItem('lexi_snap_' + userId, json);
+    console.log('[SNAPSHOT] saved for user', userId, 'size=' + json.length);
+    return true;
+  } catch(e) {
+    // 配额溢出时，降级保存核心数据（只存 states，不扫描整个 localStorage）
+    if (e.name === 'QuotaExceededError' || e.message.indexOf('quota') !== -1) {
+      console.warn('[SNAPSHOT] quota exceeded for user', userId, 'saving essential data only');
+      try {
+        const essential = {};
+        // 只保存学习状态数据（最重要的）
+        for(const key in localCache.states) { essential['lexi_db_'+key] = String(localCache.states[key]); }
+        // 保存收藏
+        for(const w of localCache.starred) { essential['wrev3_star_'+w] = '1'; }
+        // 保存打卡记录（通常不大）
+        if(Object.keys(localCache.checkin||{}).length) essential['lexi_ci_v1'] = JSON.stringify(localCache.checkin);
+        const json2 = JSON.stringify(essential);
+        localStorage.setItem('lexi_snap_' + userId, json2);
+        console.log('[SNAPSHOT] essential-only snapshot saved, size=' + json2.length);
+        return true;
+      } catch(e2) {
+        console.error('[SNAPSHOT] even essential save failed:', e2);
+        return false;
+      }
+    }
+    console.error('[SNAPSHOT] save error:', e);
+    return false;
+  }
 }
 
 function _restoreAccountSnapshot(userId) {
@@ -3352,8 +3386,29 @@ function _restoreAccountSnapshot(userId) {
       console.log('[STARTUP] snapshot exists=' + !!raw + ' size=' + (raw ? raw.length : 0));
       if (!raw) {
         if (isSwitching) { console.log('[STARTUP] no snapshot, clearing'); _clearLexiLocalStorage(true, true); }
-        console.log('[STARTUP] resolve (no snapshot)');
-        resolve(); return;
+        // ★ 无本地快照时，从服务器拉取数据作为兜底
+        console.log('[STARTUP] no local snapshot, trying API fallback');
+        apiFetchSilent('GET', '/states').then(function(remoteData){
+          if (remoteData && remoteData.states && Object.keys(remoteData.states).length > 0) {
+            console.log('[STARTUP] API fallback: got', Object.keys(remoteData.states).length, 'states from server');
+            // 将服务器数据写入 localCache
+            for (var rk in remoteData.states) {
+              if (remoteData.states.hasOwnProperty(rk)) {
+                localCache.states[rk] = remoteData.states[rk];
+              }
+            }
+            if (remoteData.starred && Array.isArray(remoteData.starred)) {
+              localCache.starred = remoteData.starred;
+            }
+          } else {
+            console.log('[STARTUP] API fallback: no remote data (new user or empty)');
+          }
+          resolve();
+        }).catch(function(err){
+          console.warn('[STARTUP] API fallback failed:', err);
+          resolve();
+        });
+        return;
       }
       var snap = JSON.parse(raw);
       var entries = Object.entries(snap);
@@ -3535,7 +3590,10 @@ function doSwitchToAccount(email, token) {
 
 // ── 登录其他账号 ──
 function doLoginOther() {
-  if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
+  if (_currentUser && _currentUser.id) {
+    var saved = _saveAccountSnapshot(_currentUser.id);
+    if (!saved) console.warn('[LOGIN_OTHER] snapshot may not have saved, API will be used as fallback');
+  }
   _clearLexiLocalStorage(false, true);
   localStorage.removeItem('lexiword_token');
   localStorage.setItem('lexi_switching', '1');
@@ -3544,7 +3602,10 @@ function doLoginOther() {
 
 // ── Logout ──
 function doLogout() {
-  if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
+  if (_currentUser && _currentUser.id) {
+    var saved = _saveAccountSnapshot(_currentUser.id);
+    if (!saved) console.warn('[LOGOUT] snapshot may not have saved');
+  }
   _clearLexiLocalStorage(false, true); // 清空全部数据，保留账号列表
   clearToken();
   localStorage.removeItem('lexiword_token');
