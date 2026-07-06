@@ -3317,33 +3317,34 @@ function _saveAccountSnapshot(userId) {
 }
 
 function _restoreAccountSnapshot(userId) {
-  try {
-    var raw = localStorage.getItem('lexi_snap_' + userId);
-    if (!raw) { _clearLexiLocalStorage(true, true); return; } // 新账号无快照 → 清空残留旧数据
-    var snap = JSON.parse(raw);
-    var entries = Object.entries(snap);
-    if (!entries.length) { _clearLexiLocalStorage(true, true); return; }
-    // 先清空当前数据（保留 token 和账号列表），再全覆盖写入快照
-    _clearLexiLocalStorage(true, true);
-    var BATCH = 50, i = 0;
-    function writeBatch() {
-      var end = Math.min(i + BATCH, entries.length);
-      var wrote = false;
-      for (; i < end; i++) {
-        var k = entries[i][0], v = entries[i][1];
-        // 保护 token 和账号列表不被快照覆盖
-        if (k === 'lexiword_token' || k === 'lexi_accounts') continue;
-        localStorage.setItem(k, v);
-        wrote = true;
+  return new Promise(function(resolve) {
+    try {
+      var raw = localStorage.getItem('lexi_snap_' + userId);
+      if (!raw) { _clearLexiLocalStorage(true, true); resolve(); return; }
+      var snap = JSON.parse(raw);
+      var entries = Object.entries(snap);
+      if (!entries.length) { _clearLexiLocalStorage(true, true); resolve(); return; }
+      // 先清空当前数据（保留 token 和账号列表），再全覆盖写入快照
+      _clearLexiLocalStorage(true, true);
+      var BATCH = 50, i = 0;
+      function writeBatch() {
+        var end = Math.min(i + BATCH, entries.length);
+        for (; i < end; i++) {
+          var k = entries[i][0], v = entries[i][1];
+          if (k === 'lexiword_token' || k === 'lexi_accounts') continue;
+          localStorage.setItem(k, v);
+        }
+        if (i < entries.length) {
+          setTimeout(writeBatch, 0);
+        } else {
+          // 全部写入完成，合并进缓存然后 resolve
+          _mergeLocalStorageIntoCache();
+          resolve();
+        }
       }
-      if (i < entries.length) {
-        setTimeout(writeBatch, 0);
-      } else if (wrote) {
-        setTimeout(function() { _mergeLocalStorageIntoCache(); }, 50);
-      }
-    }
-    writeBatch();
-  } catch(e) {}
+      writeBatch();
+    } catch(e) { resolve(); }
+  });
 }
 
 // ── 清除所有 LexiLearn localStorage 数据 ──
@@ -3548,11 +3549,11 @@ function _closeAllOverlays() {
     }
     _currentUser = user;
     _tokenValid = true;
-    // 记住该账号到列表（支持后续快速切换）
     _saveAccountToList(user.email, token);
-    // 恢复该账号的快照数据（如果之前切换过账号）
-    _restoreAccountSnapshot(user.id);
-    return initData();
+    // 恢复快照后加载数据（返回Promise，保证 snapshot 写完再 merge）
+    return _restoreAccountSnapshot(user.id).then(function() {
+      return initData();
+    });
   }).then(function() {
     _markStartupDone();
     var initialView = localStorage.getItem('lexi_last_view') || 'checkin';
