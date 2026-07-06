@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>LexiLearn</title>
 <link rel="manifest" href="manifest.json">
@@ -1137,6 +1140,39 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 </style>
 </head>
 <body>
+
+<!-- ── 调试面板（仅用于排查卡死问题） ── -->
+<div id="lexi-debug-panel" style="position:fixed;top:0;left:0;right:0;z-index:100000;background:rgba(0,0,0,.85);color:#0f0;font-family:monospace;font-size:11px;padding:6px 10px;max-height:120px;overflow:auto;display:none;line-height:1.4;">
+  <div id="lexi-debug-log"></div>
+  <button onclick="window._forceRenderLexi()" style="margin-top:4px;padding:4px 8px;background:#4C52E8;color:#fff;border:none;border-radius:4px;font-family:monospace;font-size:10px;cursor:pointer;">强制渲染</button>
+</div>
+<script>
+(function(){
+  var debugPanel = document.getElementById('lexi-debug-panel');
+  var debugLog = document.getElementById('lexi-debug-log');
+  function log(msg) {
+    var t = new Date().toLocaleTimeString();
+    var line = document.createElement('div');
+    line.textContent = '[' + t + '] ' + msg;
+    debugLog.appendChild(line);
+    if (debugPanel) debugPanel.style.display = 'block';
+    console.log('[LexiDebug]', msg);
+  }
+  window._lexiDebugLog = log;
+  window.addEventListener('error', function(e) {
+    log('ERROR: ' + (e.message || e.error) + ' at ' + (e.filename || '?') + ':' + (e.lineno || '?'));
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    log('PROMISE REJECTION: ' + (e.reason && e.reason.message || e.reason));
+  });
+  window._forceRenderLexi = function() {
+    log('Force render triggered');
+    if (typeof _dataReady !== 'undefined') _dataReady = true;
+    try { switchNav('checkin'); } catch(err) { log('switchNav failed: ' + err.message); }
+  };
+  log('Debug panel initialized');
+})();
+</script>
 
 <!-- ── SVG 精灵（隐藏） ── -->
 <div id="svg-sprite" style="display:none">
@@ -3486,8 +3522,11 @@ function _closeAllOverlays() {
 
 // ── Startup: validate token, load data ──
 (function(){
+  if (typeof _lexiDebugLog === 'function') _lexiDebugLog('startup IIFE begin');
   _closeAllOverlays(); // 确保无遮罩残留
+  if (typeof _lexiDebugLog === 'function') _lexiDebugLog('overlays closed');
   const token = getToken();
+  if (typeof _lexiDebugLog === 'function') _lexiDebugLog('token=' + (token ? 'yes' : 'no'));
   if (!token) { window.location.href = 'login.html'; return; }
   // 一次性清理：删除 lexi_accounts 中的无效条目
   try {
@@ -3508,15 +3547,17 @@ function _closeAllOverlays() {
     _dataReady = true;
   }
   setTimeout(function() {
+    if (typeof _lexiDebugLog === 'function') _lexiDebugLog('startup timeout fired, _startupDone=' + _startupDone);
     if (!_startupDone) {
-      console.warn('[LexiLearn] Startup timeout — forcing UI render');
       _markStartupDone();
       var v = localStorage.getItem('lexi_last_view') || 'checkin';
-      try { switchNav(v); } catch(e) { console.error('[LexiLearn] Force switchNav failed', e); }
+      try { switchNav(v); } catch(e) { if (typeof _lexiDebugLog === 'function') _lexiDebugLog('force switchNav error: ' + e.message); }
     }
   }, 3000);
 
+  if (typeof _lexiDebugLog === 'function') _lexiDebugLog('calling /api/auth/me');
   apiFetch('GET', '/api/auth/me').then(user => {
+    if (typeof _lexiDebugLog === 'function') _lexiDebugLog('/api/auth/me success, user.email=' + (user && user.email));
     _currentUser = user;
     // 如果 API 返回的 user 没有 email，从记住的账号列表反查
     if (!user || !user.email) {
@@ -3531,18 +3572,21 @@ function _closeAllOverlays() {
     _saveAccountToList(user.email, token);
     // 恢复该账号的快照数据（如果之前切换过账号）
     _restoreAccountSnapshot(user.id);
+    if (typeof _lexiDebugLog === 'function') _lexiDebugLog('calling initData');
     return initData();
   }).then(function() {
+    if (typeof _lexiDebugLog === 'function') _lexiDebugLog('initData done, rendering checkin');
     _markStartupDone();
     var initialView = localStorage.getItem('lexi_last_view') || 'checkin';
     switchNav(initialView);
   }).catch(function(err) {
-    console.warn('[LexiLearn] Startup fallback:', err);
+    if (typeof _lexiDebugLog === 'function') _lexiDebugLog('startup catch: ' + (err && err.message || err));
     _markStartupDone();
     try { _restoreFromLocalStorage(); } catch(e2) {}
     var initialView = localStorage.getItem('lexi_last_view') || 'checkin';
     switchNav(initialView);
   });
+  if (typeof _lexiDebugLog === 'function') _lexiDebugLog('startup IIFE end');
 })();
 
 </script>

@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>LexiLearn - 登录</title>
 <link rel="manifest" href="manifest.json">
@@ -201,7 +204,8 @@ async function doLogin() {
       localStorage.setItem('lexi_accounts', JSON.stringify(filtered));
     } catch(e) {}
     setToken(data.token);
-    window.location.href = 'Lexiword.html';
+    // 跳转时加 cache-buster，避免浏览器/SW 缓存旧版 Lexiword.html
+    window.location.href = 'Lexiword.html?_t=' + Date.now();
   } catch (e) {
     errorEl.textContent = e.message;
   } finally {
@@ -252,7 +256,7 @@ document.addEventListener('keydown', e => {
     const res = await fetch(API_BASE + '/auth/me', {
       headers: {'Authorization': 'Bearer ' + token}
     });
-    if (res.ok) window.location.href = 'Lexiword.html';
+    if (res.ok) window.location.href = 'Lexiword.html?_t=' + Date.now();
     else clearToken();
   } catch(e) {
     // Backend unavailable, stay on login

@@ -1,5 +1,5 @@
 // LexiLearn Service Worker - PWA offline support
-const CACHE_NAME = 'lexilearn-v3';
+const CACHE_NAME = 'lexilearn-v4';
 const STATIC_ASSETS = [
   './',
   './login.html',
