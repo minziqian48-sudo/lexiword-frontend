@@ -1544,7 +1544,7 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   <div class="bottom-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="sheet-user-email">我的</div>
-    <button class="sheet-item primary" onclick="doSwitchAccount();closeProfileSheet();">
+    <button class="sheet-item primary" onclick="openAccountPicker();closeProfileSheet();">
       <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-user"></use></svg>
       切换账号
     </button>
@@ -1557,6 +1557,20 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
       退出登录
     </button>
     <button class="sheet-item sheet-cancel" onclick="closeProfileSheet()">取消</button>
+  </div>
+</div>
+
+<!-- ── 切换账号选择面板 ── -->
+<div id="account-picker" class="sheet-overlay" onclick="if(event.target===this)closeAccountPicker()">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">切换账号</div>
+    <div id="account-picker-list" style="padding:0 0 8px 0;"></div>
+    <button class="sheet-item" onclick="doLoginOther();closeAccountPicker();" style="color:var(--accent);">
+      <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-user"></use></svg>
+      登录其他账号
+    </button>
+    <button class="sheet-item sheet-cancel" onclick="closeAccountPicker()">取消</button>
   </div>
 </div>
 
@@ -3325,10 +3339,86 @@ function _clearGenericData() {
   localStorage.removeItem('lexi_last_user');
 }
 
-// ── Logout / Switch Account ──
+// ── 记住的账号列表 ──
+function _getAccountList() {
+  try { return JSON.parse(localStorage.getItem('lexi_accounts')||'[]'); } catch(e) { return []; }
+}
+function _saveAccountToList(email, token) {
+  const list = _getAccountList().filter(a => a.email !== email);
+  list.unshift({ email, token, lastLogin: Date.now() });
+  // 最多保留 5 个账号
+  if (list.length > 5) list.length = 5;
+  localStorage.setItem('lexi_accounts', JSON.stringify(list));
+}
+function _removeAccount(email) {
+  const list = _getAccountList().filter(a => a.email !== email);
+  localStorage.setItem('lexi_accounts', JSON.stringify(list));
+  // 如果删的是当前账号，清除快照
+  if (_currentUser && _currentUser.id) {
+    // Keep snapshot, just remove from list
+  }
+}
+
+// ── 切换账号面板 ──
+function openAccountPicker() {
+  const list = _getAccountList();
+  const container = document.getElementById('account-picker-list');
+  if (!container) return;
+  container.innerHTML = '';
+  const currentEmail = _currentUser ? _currentUser.email : '';
+  
+  list.forEach(acct => {
+    const isCurrent = acct.email === currentEmail;
+    const div = document.createElement('div');
+    div.className = 'sheet-item' + (isCurrent ? ' primary' : '');
+    div.style.cssText = 'justify-content:flex-start;padding:14px 20px;font-size:14px;';
+    div.innerHTML = 
+      '<svg style="width:18px;height:18px;flex-shrink:0;margin-right:10px;" aria-hidden="true"><use href="#ic-user"></use></svg>' +
+      '<span style="flex:1;text-align:left;">' + acct.email + (isCurrent ? ' <span style="font-size:11px;opacity:.6;">(当前)</span>' : '') + '</span>' +
+      '<span style="font-size:10px;color:var(--ink-3);">' + new Date(acct.lastLogin).toLocaleDateString() + '</span>';
+    div.onclick = function(e) {
+      e.stopPropagation();
+      if (isCurrent) { closeAccountPicker(); return; }
+      doSwitchToAccount(acct.email, acct.token);
+    };
+    container.appendChild(div);
+  });
+  
+  if (list.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink-3);font-size:13px;">暂无已记住的账号</div>';
+  }
+  
+  document.getElementById('account-picker').classList.add('show');
+}
+function closeAccountPicker() {
+  document.getElementById('account-picker').classList.remove('show');
+}
+
+// ── 切换到指定账号 ──
+function doSwitchToAccount(email, token) {
+  // 保存当前账号快照
+  if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
+  _clearGenericData();
+  // 设置新 token
+  localStorage.setItem('lexiword_token', token);
+  // 更新最后登录时间
+  _saveAccountToList(email, token);
+  // 刷新页面
+  window.location.reload();
+}
+
+// ── 登录其他账号 ──
+function doLoginOther() {
+  if (_currentUser && _currentUser.id) _saveAccountSnapshot(_currentUser.id);
+  _clearGenericData();
+  localStorage.removeItem('lexiword_token');
+  window.location.href = 'login.html';
+}
+
+// ── Logout ──
 function doLogout() {
-  // 清除所有 LexiLearn 相关 localStorage 数据（包括快照）
-  const prefixes = ['lexi_','wrev3_','checkin_','lexilearn_'];
+  // 清除所有 LexiLearn 相关数据（保留账号列表 lexi_accounts）
+  const prefixes = ['lexi_db_','wrev3_','checkin_','lexilearn_','lexi_ci_v1','lexi_sets_v1','lexi_pin_v1','lexi_vocab_bookmark_v1','lexi_visit_v1','lexi_snap_','lexiword_token','lexi_last_view','lexi_last_user','lexi_custom_m_'];
   for(let i=localStorage.length-1;i>=0;i--){
     const k=localStorage.key(i);
     if(k && prefixes.some(p=>k.startsWith(p))){
@@ -3336,16 +3426,6 @@ function doLogout() {
     }
   }
   clearToken();
-  localStorage.removeItem('lexiword_token');
-  window.location.href = 'login.html';
-}
-
-function doSwitchAccount() {
-  // 保存当前账号快照，清临时数据，跳转登录
-  if (_currentUser && _currentUser.id) {
-    _saveAccountSnapshot(_currentUser.id);
-    _clearGenericData();
-  }
   localStorage.removeItem('lexiword_token');
   window.location.href = 'login.html';
 }
@@ -3370,6 +3450,8 @@ function closeProfileSheet() {
   apiFetch('GET', '/api/auth/me').then(user => {
     _currentUser = user;
     _tokenValid = true;
+    // 记住该账号到列表（支持后续快速切换）
+    _saveAccountToList(user.email, token);
     // 先恢复该账号的快照数据（如果之前切换过账号）
     _restoreAccountSnapshot(user.id);
     return initData();

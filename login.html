@@ -192,6 +192,14 @@ async function doLogin() {
 
   try {
     const data = await apiPost('/auth/login', {email, password: pwd});
+    // 记住账号到本地列表
+    try {
+      const list = JSON.parse(localStorage.getItem('lexi_accounts')||'[]');
+      const filtered = list.filter(a => a.email !== email);
+      filtered.unshift({ email, token: data.token, lastLogin: Date.now() });
+      if (filtered.length > 5) filtered.length = 5;
+      localStorage.setItem('lexi_accounts', JSON.stringify(filtered));
+    } catch(e) {}
     setToken(data.token);
     window.location.href = 'Lexiword.html';
   } catch (e) {
