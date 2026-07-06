@@ -1,5 +1,5 @@
 // LexiLearn Service Worker - PWA offline support
-const CACHE_NAME = 'lexilearn-v1';
+const CACHE_NAME = 'lexilearn-v3';
 const STATIC_ASSETS = [
   './',
   './login.html',
@@ -17,7 +17,7 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: clean old caches (delete any cache that isn't current version)
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -27,7 +27,7 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static
+// Fetch: network-first for HTML (so updates always reach users), cache-first for assets
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
@@ -37,11 +37,24 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Static assets: cache-first, fallback to network
+  // HTML documents: network-first (always get fresh HTML, fall back to cache when offline)
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request).then(c => c || caches.match('./')))
+    );
+    return;
+  }
+
+  // Static assets (images, icons, css, js): cache-first, fallback to network
   e.respondWith(
     caches.match(e.request).then(cached => {
       return cached || fetch(e.request).then(res => {
-        // Cache new resources
         if (res.ok && e.request.method === 'GET') {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));

@@ -3415,9 +3415,24 @@ function doLogout() {
   if(pageArea) pageArea.addEventListener('scroll',scheduleRail,{passive:true});
 })();
 
-// PWA Service Worker
+// PWA Service Worker — auto-reload when a new SW takes over
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (nw) nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          // New SW installed and an old one is controlling the page → reload to get fresh code
+          location.reload();
+        }
+      });
+    });
+  }).catch(() => {});
+  // If a different controller takes over (skipWaiting), reload once
+  let _swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!_swReloaded) { _swReloaded = true; location.reload(); }
+  });
 }
 </script>
 </body>
