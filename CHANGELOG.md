@@ -5,6 +5,34 @@
 
 ---
 
+## 2026-07-06 · 第五轮 (commit: 759e1ef)
+
+### 🐛 修复：日历闪现
+
+**现象**：切换/登录后，打卡页日历先折叠（空状态），过一会才显示完整数据。
+
+**根因**：`_restoreAccountSnapshot` 在非切换模式下，异步批量循环空转。虽然每个 key 因已存在 localStorage 而被跳过（`if (!isSwitching && localStorage.getItem(k)) continue;`），但 8000+ 条目仍需 ~160 轮 `setTimeout(0)` 延迟，导致 3 秒超时先触发渲染空 UI。
+
+**修复**：非切换模式直接调用 `_mergeLocalStorageIntoCache()` + `resolve()`，完全跳过空转循环。
+
+### 🛡️ 修复：切换账号数据丢失（防御性安全网）
+
+**现象**：切换账号后再切回，原账号数据全部丢失。
+
+**防御措施**：
+1. `doSwitchToAccount` 新增 email 键安全快照：无论 `_currentUser` 是否可用，始终从账号列表反查当前邮箱，额外保存 `lexi_snap_em_{email}` 快照
+2. `_restoreAccountSnapshot` 新增 email 键回退：当 numeric ID 快照未找到时，自动从账号列表反查 email，尝试 email 键快照
+3. 新增 `[SWITCH]` 调试日志追踪切换全过程
+
+**恢复**：
+```bash
+git checkout 97e5a6a -- Lexiword.html
+```
+
+---
+
+---
+
 ## 2026-07-06 · 第四轮 (commit: e07102b) 🔴 根因修复
 
 ### 🔴 修复：导入数据丢失（根本原因）
