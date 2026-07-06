@@ -353,10 +353,76 @@ var APP_URL = token
 
 ---
 
+## 2026-07-06 · 修复 (commit: 0771fb5)
+
+### 🔴 修复 1️⃣ 清数据后登录仍然卡死（最根本原因）
+
+**问题**：清除 App 数据后重新登录，界面完全无法点击，一动也不能动。
+
+**根因（致命）**：HTML 中存在**两个 `id="page-area"` 的元素**：
+- 第一个在 1142 行，包裹 SVG 精灵图（`display:none`），但从未关闭
+- 第二个在 1255 行，是实际的内容区域
+- 两者嵌套在一起，都应用了 `overflow-y:auto` 的 CSS
+- 在 HBuilderX WebView 中，外层不可见的滚动容器**吞噬了所有触摸事件**
+- 导致内层所有按钮/链接完全收不到点击 → 界面看起来"卡死"
+
+**修复**：将第一个 `id="page-area"` 改为 `id="svg-sprite"` 并补全关闭标签
+
+```diff
+- <div id="page-area" class="page-area">
++ <div id="svg-sprite">
+  <svg ...>
+  ...
+  </svg>
++</div>   ← 新增：关闭 svg-sprite 容器
+```
+
+**如何恢复**：`git checkout f6fa1b4 -- Lexiword.html` （不推荐，会恢复 bug）
+
+---
+
+### 🔴 修复 2️⃣ 账号快照恢复完全失效
+
+**问题**：切换账号后，原账号的数据永远无法从快照恢复。
+
+**根因**：第 3318 行 `const snap = JSON.parse(snap)` 中变量名写错：
+- `snap` 在赋值前就被引用 → `ReferenceError`
+- 被 `try-catch` 静默吞掉 → 函数永远不执行任何操作
+
+```diff
+- const snap = JSON.parse(snap);   // snap 未定义！ReferenceError
++ const snap = JSON.parse(raw);    // 正确：解析原始字符串
+```
+
+**如何恢复**：改回 `JSON.parse(snap)`（不推荐）
+
+---
+
+### 🛡️ 新增 3️⃣ 启动安全网超时
+
+**功能**：如果启动异步链（API → initData → switchNav）在 **3 秒内未完成**，强制渲染 UI。
+
+**原因防御**：
+- API 超时无响应
+- 某个 `.then()` 内部抛出未被捕获的异常
+- Promise 链中断但没触发 `.catch()`
+
+```js
+setTimeout(function() {
+  if (!_startupDone) {
+    _dataReady = true;
+    switchNav(localStorage.getItem('lexi_last_view') || 'checkin');
+  }
+}, 3000);
+```
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `0771fb5` | 07-06 | 🔴 修复：清数据后卡死（重复page-area ID）+ 快照恢复bug + 启动安全网 |
 | `f6fa1b4` | 07-06 | 修复：切换卡死 + 登录页闪现 |
 | `3f33540` | 07-06 | 修复：切换账号 undefined |
 | `a3ec7fa` | 07-06 | 第四轮：记住账号点选切换 |
