@@ -439,10 +439,34 @@ setTimeout(function() {
 
 ---
 
+## 2026-07-06 · 修复 (commit: dd18ca8)
+
+### 修复：浏览器验证也卡死 — 全面缓存破坏 + 调试面板
+
+**问题**：用户反馈用浏览器直接验证（清数据 → 登录）仍然卡在打卡页无法点击。说明问题不在 HBuilderX WebView 缓存，而在页面本身或浏览器/SW 缓存了旧版。
+
+**修复内容**：
+| 文件 | 改动 |
+|------|------|
+| `login.html` | 登录/自动登录跳转改为 `Lexiword.html?_t=Date.now()`，破坏缓存 |
+| `Lexiword.html` | 添加 no-cache meta tags |
+| `login.html` | 添加 no-cache meta tags |
+| `sw.js` | 缓存名 `lexilearn-v3` → `lexilearn-v4`，强制浏览器安装新 Service Worker |
+| `Lexiword.html` | 顶部新增调试面板：全局错误捕获 + 启动流程日志 + 强制渲染按钮 |
+| `Lexiword.html` | 启动 IIFE 各环节加 `_lexiDebugLog` 日志点 |
+
+**用户如何验证**：
+1. 清掉浏览器缓存/Service Worker（或直接用隐私模式/无痕窗口）
+2. 打开登录页： `https://minziqian48-sudo.github.io/lexiword-frontend/login.html?_t=1`
+3. 登录后观察顶部绿色调试面板，看最后停在哪个日志
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `dd18ca8` | 07-06 | 修复：浏览器也卡死 — 全面缓存破坏 + 调试面板 + SW v4 |
 | `f67f5b9` | 07-06 | 修复：svg-sprite 显式 display:none + HBuilderX 缓存破坏 |
 | `0771fb5` | 07-06 | 🔴 修复：清数据后卡死（重复page-area ID）+ 快照恢复bug + 启动安全网 |
 | `f6fa1b4` | 07-06 | 修复：切换卡死 + 登录页闪现 |
