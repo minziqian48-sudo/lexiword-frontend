@@ -3341,13 +3341,20 @@ function _clearGenericData() {
 
 // ── 记住的账号列表 ──
 function _getAccountList() {
-  try { return JSON.parse(localStorage.getItem('lexi_accounts')||'[]'); } catch(e) { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('lexi_accounts')||'[]');
+    // 过滤掉无效记录（无 email 或无 token）
+    return Array.isArray(raw) ? raw.filter(a => a && a.email && a.token) : [];
+  } catch(e) { return []; }
 }
 function _saveAccountToList(email, token) {
+  if (!email || !token) return; // 防御：不存无效数据
   const list = _getAccountList().filter(a => a.email !== email);
   list.unshift({ email, token, lastLogin: Date.now() });
   // 最多保留 5 个账号
   if (list.length > 5) list.length = 5;
+  localStorage.setItem('lexi_accounts', JSON.stringify(list));
+}
   localStorage.setItem('lexi_accounts', JSON.stringify(list));
 }
 function _removeAccount(email) {
@@ -3365,7 +3372,13 @@ function openAccountPicker() {
   const container = document.getElementById('account-picker-list');
   if (!container) return;
   container.innerHTML = '';
-  const currentEmail = _currentUser ? _currentUser.email : '';
+  const token = getToken();
+  // 从 token 判断哪个是当前账号（比 email 更可靠）
+  let currentEmail = (_currentUser && _currentUser.email) || '';
+  if (!currentEmail) {
+    const found = list.find(a => a.token === token);
+    currentEmail = found ? found.email : '';
+  }
   
   list.forEach(acct => {
     const isCurrent = acct.email === currentEmail;
@@ -3447,7 +3460,25 @@ function closeProfileSheet() {
 (function(){
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
+  // 一次性清理：删除 lexi_accounts 中的无效条目
+  try {
+    const raw = JSON.parse(localStorage.getItem('lexi_accounts')||'null');
+    if (raw && Array.isArray(raw)) {
+      const cleaned = raw.filter(a => a && a.email && a.token);
+      if (cleaned.length !== raw.length) {
+        localStorage.setItem('lexi_accounts', JSON.stringify(cleaned));
+      }
+    }
+  } catch(e) {}
   apiFetch('GET', '/api/auth/me').then(user => {
+    _currentUser = user;
+    // 如果 API 返回的 user 没有 email，从记住的账号列表反查
+    if (!user || !user.email) {
+      const token = getToken();
+      const list = _getAccountList();
+      const found = list.find(a => a.token === token);
+      if (found) { user = user || {}; user.email = found.email; }
+    }
     _currentUser = user;
     _tokenValid = true;
     // 记住该账号到列表（支持后续快速切换）
