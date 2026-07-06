@@ -6,3 +6,23 @@ __pycache__/
 *.db
 node_modules/
 .DS_Store
+
+# SSL 证书和私钥（敏感信息，不提交到仓库）
+*.key
+*.pem
+*.crt
+
+# 一次性工具和中间产物
+build_app.py
+extract_daybook.py
+daybook_data.py
+deploy_backend/app_full.py
+
+# 第三方工具
+*.jar
+
+# AI 临时文件
+overview.md/
+
+# 编译缓存
+__pycache__/
