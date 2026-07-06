@@ -3097,7 +3097,12 @@ function _restoreFromLocalStorage() {
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k && k.startsWith('lexi_db_')){
-      localCache.states[k.slice(8)] = parseInt(localStorage.getItem(k)||'0');
+      let key=k.slice(8);
+      if(key.indexOf(':')<0){
+        const us=key.indexOf('_');
+        if(us>0)key=key.slice(0,us)+':'+key.slice(us+1);
+      }
+      localCache.states[key]=parseInt(localStorage.getItem(k)||'0');
     }
   }
   localCache.starred = [];
@@ -3116,18 +3121,27 @@ function _restoreFromLocalStorage() {
 
 function _mergeLocalStorageIntoCache() {
   // Merge imported backup data (lexi_db_* keys) into API-loaded state cache
+  // Supports both old format (lexi_db_1_word) and new format (lexi_db_1:word)
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k && k.startsWith('lexi_db_')){
-      localCache.states[k.slice(8)] = parseInt(localStorage.getItem(k)||'0');
+      let key=k.slice(8); // remove 'lexi_db_' prefix
+      // Convert old backup format: 1_word → 1:word
+      if(key.indexOf(':')<0){
+        const firstUnderscore=key.indexOf('_');
+        if(firstUnderscore>0){
+          key=key.slice(0,firstUnderscore)+':'+key.slice(firstUnderscore+1);
+        }
+      }
+      localCache.states[key]=parseInt(localStorage.getItem(k)||'0');
     }
   }
   // Merge starred words from backup (wrev3_star_* keys)
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k && k.startsWith('wrev3_star_') && localStorage.getItem(k)==='1'){
-      const w = k.slice(11);
-      if(!localCache.starred.includes(w)) localCache.starred.push(w);
+      const w=k.slice(11);
+      if(!localCache.starred.includes(w))localCache.starred.push(w);
     }
   }
 }
