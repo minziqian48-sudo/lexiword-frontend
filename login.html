@@ -134,6 +134,17 @@ function getToken() { return localStorage.getItem(TOKEN_KEY); }
 function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 
+// 登录前清除所有 LexiLearn 旧数据，防止账号间数据泄露
+function clearOldAppData() {
+  const prefixes = ['lexi_','wrev3_','checkin_'];
+  for(let i=localStorage.length-1;i>=0;i--){
+    const k=localStorage.key(i);
+    if(k && prefixes.some(p=>k.startsWith(p))){
+      localStorage.removeItem(k);
+    }
+  }
+}
+
 // ── Tab switching ──
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -181,6 +192,7 @@ async function doLogin() {
 
   try {
     const data = await apiPost('/auth/login', {email, password: pwd});
+    clearOldAppData(); // 清除旧账号本地数据
     setToken(data.token);
     window.location.href = 'Lexiword.html';
   } catch (e) {

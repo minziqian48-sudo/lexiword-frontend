@@ -67,16 +67,16 @@ body{
   background:var(--bg); color:var(--ink);
   -webkit-tap-highlight-color:transparent;
   display:flex; flex-direction:column;
-  padding-top:var(--sat);
 }
 
 /* APP SHELL */
 #app-shell{display:flex; flex-direction:column; height:100%; overflow:hidden;}
-#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size;}
+#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size; padding-bottom:calc(var(--nav-h) + var(--sab));}
 
 /* BOTTOM TAB NAR */
 #bottom-nav{
   display:flex; flex-shrink:0;
+  position:fixed; bottom:0; left:0; right:0;
   background:var(--surface); border-top:1px solid var(--border);
   box-shadow:0 -4px 20px rgba(0,0,0,.07);
   padding-bottom:var(--sab);
@@ -153,13 +153,13 @@ body{
 .sfoot-icon{font-size:16px;}
 
 /* VIEW PAGES */
-.view-page{display:none; padding:16px 16px 24px; animation:page-in .2s var(--ease) both; min-height:100%; overflow-x:hidden;}
+.view-page{display:none; padding:12px 16px 24px; animation:page-in .2s var(--ease) both; min-height:100%; overflow-x:hidden;}
 .view-page.active{display:block;}
 @keyframes page-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* 修复1：大幅增加顶部间距，避免被手机状态栏遮挡 */
-.page-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-top:calc(max(var(--sat), 12px) + 4px);}
-.page-title{font-size:24px; font-weight:900; color:var(--ink); letter-spacing:-.03em;}
+/* 页面顶部间距，适配状态栏 */
+.page-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-top:calc(max(var(--sat), 10px) + 2px);}
+.page-title{font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-.03em;}
 .page-sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
 .page-header-actions{display:flex; gap:8px; align-items:center;}
 .icon-btn{width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:var(--surface); border:1.5px solid var(--border-s); border-radius:var(--r-md); font-size:18px; cursor:pointer; -webkit-tap-highlight-color:transparent;}
@@ -260,9 +260,9 @@ body{
 #global-search{flex:1; padding:11px 14px 11px 38px; font-size:14px; font-family:inherit; border:1.5px solid var(--border-s); border-radius:var(--r-md); background:var(--surface); color:var(--ink); outline:none; box-shadow:var(--sh-xs);}
 #global-search:focus{border-color:var(--accent);}
 #btn-export-txt{padding:0 14px; background:var(--surface); border:1.5px solid var(--border-s); border-radius:var(--r-md); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;}
-.state-filter,.filter-scroll{display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
+.state-filter,.filter-scroll{display:flex; gap:5px; margin-bottom:8px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
 .state-filter::-webkit-scrollbar,.filter-scroll::-webkit-scrollbar{display:none;}
-.filter-btn{flex-shrink:0; padding:7px 16px; font-size:12px; font-weight:700; border-radius:20px; border:1.5px solid var(--border-s); background:var(--surface); color:var(--ink-2); cursor:pointer; -webkit-tap-highlight-color:transparent;}
+.filter-btn{flex-shrink:0; padding:5px 13px; font-size:11px; font-weight:700; border-radius:20px; border:1.5px solid var(--border-s); background:var(--surface); color:var(--ink-2); cursor:pointer; -webkit-tap-highlight-color:transparent;}
 .filter-btn.active{background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 8px var(--accent-glow);}
 .section-label{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); margin-bottom:6px;}
 .legend-box{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;}
@@ -592,8 +592,8 @@ body[data-cn-mode="always"][data-cn-detail="full"] .word-card .wc-cn{
 }
 
 /* 学习日志条目 */
-.log-panel{ background:var(--surface); border-radius:var(--r-lg); border:1.5px solid var(--border); padding:14px; box-shadow:var(--sh-xs); }
-.log-date-title{ font-size:15px; font-weight:800; color:var(--ink); margin-bottom:10px; }
+.log-panel{ background:var(--surface); border-radius:var(--r-lg); border:1.5px solid var(--border); padding:12px; box-shadow:var(--sh-xs); }
+.log-date-title{ font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px; }
 .log-entry{ display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
 .log-entry:last-child{ border-bottom:none; }
 .log-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:5px; }
@@ -832,7 +832,7 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
 .backup-modal-btn.secondary{ background:var(--surface-2); color:var(--ink); border:1.5px solid var(--border-s); }
 
 /* ── 排序切换按钮 ── */
-.sort-toggle-bar{display:flex;gap:6px;margin-bottom:10px;align-items:center;}
+.sort-toggle-bar{display:flex;gap:5px;margin-bottom:6px;align-items:center;}
 .sort-btn{
   padding:5px 12px;font-size:11px;font-weight:700;border-radius:20px;
   border:1.5px solid var(--border-s);background:var(--surface);color:var(--ink-3);
@@ -946,7 +946,7 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
 #set-detail-grid .star-btn{font-size:11px;}
 
 /* ── 全局详略模式 ── */
-.detail-mode-bar{display:flex;gap:6px;margin-bottom:10px;align-items:center;}
+.detail-mode-bar{display:flex;gap:5px;margin-bottom:6px;align-items:center;}
 .detail-btn{padding:5px 13px;font-size:11px;font-weight:700;border-radius:20px;border:1.5px solid var(--border-s);background:var(--surface);color:var(--ink-3);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;}
 .detail-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 /* 全局详略：详细模式时wc-cn展开 */
@@ -967,8 +967,8 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   position: relative;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   border-radius: var(--r-xl);
-  padding: 28px 20px 22px;
-  margin-bottom: 18px;
+  padding: 20px 18px 16px;
+  margin-bottom: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -978,16 +978,16 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   position: absolute; inset: 0; pointer-events: none; overflow: hidden;
 }
 .ci-hero-content { position: relative; z-index: 1; width: 100%; text-align: center; }
-.ci-hero-date   { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.7); margin-bottom: 16px; letter-spacing: .04em; }
-.ci-hero-btn-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+.ci-hero-date   { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.7); margin-bottom: 10px; letter-spacing: .04em; }
+.ci-hero-btn-wrap { display: flex; justify-content: center; margin-bottom: 10px; }
 #ci-btn {
-  width: 110px; height: 110px; border-radius: 50%; cursor: pointer;
+  width: 84px; height: 84px; border-radius: 50%; cursor: pointer;
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 2px solid rgba(255,255,255,.35);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 0 0 8px rgba(255,255,255,.1);
+  box-shadow: 0 6px 24px rgba(0,0,0,.18), 0 0 0 6px rgba(255,255,255,.1);
   transition: transform .2s var(--spring), box-shadow .2s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -998,15 +998,15 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 0 0 8px rgba(255,255,255,.18);
 }
 #ci-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,.9); margin-top: 5px; letter-spacing: .03em; }
-.ci-hero-title  { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-.ci-hero-sub    { font-size: 12px; color: rgba(255,255,255,.75); }
-.ci-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.ci-hero-title  { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 2px; }
+.ci-hero-sub    { font-size: 11px; color: rgba(255,255,255,.75); }
+.ci-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .ci-stat-card {
-  background: var(--surface); border-radius: var(--r-lg); padding: 14px 10px;
+  background: var(--surface); border-radius: var(--r-lg); padding: 10px 8px;
   text-align: center; border: 1.5px solid var(--border); box-shadow: var(--sh-xs);
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
 }
-.ci-stat-icon { font-size: 0; margin-bottom: 4px; }
+.ci-stat-icon { font-size: 0; margin-bottom: 2px; }
 .ci-stat-icon svg { display: block; }
 .ci-stat-num   { font-size: 26px; font-weight: 900; color: var(--accent); line-height: 1; }
 .ci-stat-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
@@ -1040,7 +1040,7 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 }
 
 /* ── 词库页 cn-mode 条 ── */
-.vocab-cn-mode-bar { display:flex; gap:6px; margin-bottom:10px; align-items:center; flex-wrap:wrap; }
+.vocab-cn-mode-bar { display:flex; gap:5px; margin-bottom:6px; align-items:center; flex-wrap:wrap; }
 
 /* ── SVG icon helpers ── */
 .bnav-icon svg { display:block; }
@@ -2874,17 +2874,25 @@ function _collectBackupData(){
   return {data, count:Object.keys(data).length};
 }
 
+let _cachedBackup = null; // 缓存的备份数据，避免重复采集
+
 function openBackupModal(){
-  const {count,data}=_collectBackupData();
-  const json=JSON.stringify(data,null,2);
-  const sizeKB=(new TextEncoder().encode(json).length/1024).toFixed(1);
+  // 立即显示弹窗，避免用户感觉卡顿
+  document.getElementById('backup-modal-overlay').style.display='flex';
   const info=document.getElementById('backup-export-info');
-  if(info)info.textContent='共 '+count+' 条数据，约 '+sizeKB+' KB';
+  if(info)info.innerHTML='<span class="spinner" style="border-color:rgba(76,82,232,.3);border-top-color:var(--accent);"></span> 正在收集数据…';
   document.getElementById('backup-import-text').value='';
   document.getElementById('backup-import-info').textContent='';
-  document.getElementById('backup-modal-overlay').style.display='flex';
+  // 异步采集数据，不阻塞 UI
+  setTimeout(()=>{
+    _cachedBackup = _collectBackupData();
+    const {count,data}=_cachedBackup;
+    const json=JSON.stringify(data,null,2);
+    const sizeKB=(new TextEncoder().encode(json).length/1024).toFixed(1);
+    if(info)info.textContent='共 '+count+' 条数据，约 '+sizeKB+' KB';
+  }, 50);
 }
-function closeBackupModal(){document.getElementById('backup-modal-overlay').style.display='none';}
+function closeBackupModal(){document.getElementById('backup-modal-overlay').style.display='none';_cachedBackup=null;}
 
 // 兼容旧调用
 function doExportBackup(){ openBackupModal(); }
@@ -2898,7 +2906,8 @@ function _downloadBlob(blob,filename){
 }
 
 function doExportCopy(){
-  const {data,count}=_collectBackupData();
+  const backup = _cachedBackup || _collectBackupData();
+  const {data,count}=backup;
   if(!count){showToast('暂无数据可复制');return;}
   const json=JSON.stringify(data,null,2);
   const btn=document.getElementById('backup-copy-btn');
@@ -3058,7 +3067,8 @@ function _execCmdCopy(text, onSuccess, onFail) {
 
 // Backup export/copy overrides for HBuilderX App and mobile WebView.
 function doExportFile(){
-  const {data,count}=_collectBackupData();
+  const backup = _cachedBackup || _collectBackupData();
+  const {data,count}=backup;
   if(!count){showToast('暂无数据可备份');return;}
   const json=JSON.stringify(data,null,2);
   const filename='LexiLearn_backup_'+new Date().toISOString().slice(0,10)+'.json';
@@ -3109,7 +3119,8 @@ function doExportFile(){
 }
 
 function doExportCopy(){
-  const {data,count}=_collectBackupData();
+  const backup = _cachedBackup || _collectBackupData();
+  const {data,count}=backup;
   if(!count){showToast('暂无数据可复制');return;}
   const json=JSON.stringify(data,null,2);
   const btn=document.getElementById('backup-copy-btn');
@@ -3176,20 +3187,12 @@ async function initData() {
     localCache.sets = sets || [];
     localCache.pins = pins || {};
     localCache.bookmark = bookmark.word || '';
-    // 如果后端某些模块为空，用 localStorage 兜底合并（避免导入数据被清空）
-    try {
-      if(!Object.keys(localCache.checkin).length) localCache.checkin = JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
-      if(!localCache.sets.length) localCache.sets = JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]');
-      if(!Object.keys(localCache.pins).length) localCache.pins = JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}');
-      if(!localCache.bookmark) localCache.bookmark = localStorage.getItem('lexi_vocab_bookmark_v1')||'';
-      if(!Object.keys(localCache.visitDays).length) localCache.visitDays = JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
-    } catch(e){}
-    // Merge localStorage backup data (takes priority over empty backend)
-    _mergeLocalStorageIntoCache();
+    // 注意：不再用 localStorage 兜底 — 后端返回空=用户确实没有数据，不同账号数据必须隔离
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
-    console.warn('Backend unavailable, limited mode', e);
+    console.warn('Backend unavailable, offline mode', e);
+    // 仅在网络错误时使用 localStorage 兜底
     _restoreFromLocalStorage();
   }
   invalidateVocabCache();
@@ -3258,6 +3261,14 @@ function _mergeLocalStorageIntoCache() {
 
 // ── Logout ──
 function doLogout() {
+  // 清除所有 LexiLearn 相关 localStorage 数据（防止账号间数据泄露）
+  const prefixes = ['lexi_','wrev3_','checkin_','lexilearn_'];
+  for(let i=localStorage.length-1;i>=0;i--){
+    const k=localStorage.key(i);
+    if(k && prefixes.some(p=>k.startsWith(p))){
+      localStorage.removeItem(k);
+    }
+  }
   clearToken();
   localStorage.removeItem('lexiword_token');
   window.location.href = 'login.html';
