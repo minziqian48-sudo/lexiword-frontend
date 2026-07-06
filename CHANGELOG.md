@@ -279,10 +279,85 @@ git checkout 9e96539 -- Lexiword.html login.html
 
 **如何恢复**：`git checkout a3ec7fa -- Lexiword.html`
 
+## 2026-07-06 · 修复 (commit: f6fa1b4)
+
+### 修复 1️⃣ 切换账号后 App 完全卡死
+
+**问题**：点切换账号后，界面卡在打卡页，一动也不能动。清缓存重来也一样。
+
+**根因**：`_restoreAccountSnapshot()` 和 `_clearGenericData()` 在同一个同步调用栈里写了上千条 `lexi_db_*` 键到 localStorage，阻塞主线程数秒钟。
+
+**修改位置**：`Lexiword.html`
+
+**改了什么**：
+```js
+// _restoreAccountSnapshot() — 从同步全量写入改为分批异步
+function _restoreAccountSnapshot(userId) {
+  const entries = Object.entries(snap);
+  const BATCH = 50;
+  let i = 0;
+  function writeBatch() {
+    const end = Math.min(i + BATCH, entries.length);
+    for (; i < end; i++) {
+      const [k, v] = entries[i];
+      if (!localStorage.getItem(k)) { localStorage.setItem(k, v); wrote = true; }
+    }
+    if (i < entries.length) setTimeout(writeBatch, 0); // yield to main thread
+    else if (wrote) setTimeout(function() { _mergeLocalStorageIntoCache(); }, 50);
+  }
+  writeBatch();  // 每批 50 条，让出主线程
+}
+
+// _clearGenericData() — 同样分批，每批 30 条
+```
+
+**如何恢复**：`git checkout 3f33540 -- Lexiword.html`
+
+---
+
+### 修复 2️⃣ 登录页闪现
+
+**问题**：每次打开 App，即使已经登录过，也要闪一下登录界面才跳转。
+
+**根因**：HBuilderX 的 `index.html`（原生壳）始终先加载 `login.html`，然后才检测到 token → 重定向。
+
+**修改位置**：`D:\data\HBuilderProjects\LexiLearn\index.html`
+
+**改了什么**：
+```js
+// 原来：永远加载 login.html
+var APP_URL = 'https://minziqian48-sudo.github.io/lexiword-frontend/login.html';
+
+// 改为：有 token 直接进 Lexiword.html
+var token = localStorage.getItem('lexiword_token');
+var APP_URL = token
+  ? 'https://minziqian48-sudo.github.io/lexiword-frontend/Lexiword.html'
+  : 'https://minziqian48-sudo.github.io/lexiword-frontend/login.html';
+```
+
+⚠️ HBuilderX 的 `index.html` 修改需要**重新云打包 APK** 才能生效。
+
+**如何恢复**：把 `index.html` 改回始终加载 `login.html`。
+
+---
+
+### 预防 3️⃣ 启动时清除残留遮罩
+
+**问题**：如果上次异常退出（崩溃/杀进程），页面可能残留 modal overlay 遮住 UI。
+
+**改了什么**：
+- 新增 `_closeAllOverlays()` 函数，枚举项目中所有可能的 overlay ID
+- 在 `document.addEventListener('DOMContentLoaded', ...)` 启动时调用
+
+**如何恢复**：删掉启动代码中的 `_closeAllOverlays()` 调用。
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `f6fa1b4` | 07-06 | 修复：切换卡死 + 登录页闪现 |
 | `3f33540` | 07-06 | 修复：切换账号 undefined |
 | `a3ec7fa` | 07-06 | 第四轮：记住账号点选切换 |
 | `d864b09` | 07-06 | 第二轮：恢复本地数据合并（补全数据类型） |
