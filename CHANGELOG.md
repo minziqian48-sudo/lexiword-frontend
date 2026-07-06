@@ -229,10 +229,39 @@ git checkout 3bcd6ff~ -- Lexiword.html login.html
 
 ---
 
+## 2026-07-06 · 第四轮 (commit: d1442f8)
+
+### ✨ 切换账号改为「记住的账号」点选
+
+**之前**：点"切换账号"→ 跳到登录页 → 重新输入邮箱密码  
+**现在**：点"切换账号"→ 弹出已登录过的账号列表 → 点一下就切过去
+
+**改了什么**：
+
+| 项目 | 说明 |
+|------|------|
+| `lexi_accounts` (localStorage) | 存 `[{email, token, lastLogin}]` 最多 5 个 |
+| `_saveAccountToList()` | 登录时/启动时自动记住账号 |
+| `_getAccountList()` | 读取已记住的账号列表 |
+| `openAccountPicker()` | 弹出账号选择面板，显示邮箱+日期+"(当前)" |
+| `doSwitchToAccount(email, token)` | 存快照→清临时→设 token→刷新 |
+| `doLoginOther()` | "登录其他账号"选项 |
+| `login.html` / 启动代码 | 登录/启动时自动保存账号 |
+| 新增 HTML | `#account-picker` 面板 |
+| `doLogout()` | 退出时保留 `lexi_accounts`（下次还能看到） |
+
+**如何恢复**：
+```bash
+git checkout 9e96539 -- Lexiword.html login.html
+```
+
+---
+
 ## 版本对照
 
 | Git Commit | 日期 | 说明 |
 |------------|------|------|
+| `d1442f8` | 07-06 | 第四轮：记住账号点选切换 |
 | `9e96539` | 07-06 | 第三轮：多账号切换+快照隔离 |
 | `d864b09` | 07-06 | 第二轮：恢复本地数据合并（补全数据类型） |
 | `e3dae30` | 07-06 | 第一轮：5 项修复（底部导航/遮罩/备份/首屏/数据隔离） |
