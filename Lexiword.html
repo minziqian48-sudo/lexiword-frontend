@@ -2885,10 +2885,11 @@ function _collectBackupData(){
 
   // 2. 直接扫描 localStorage，补充未同步到 localCache 的导入数据、自定义释义等
   const prefixes = ['lexi_','wrev3_','checkin_'];
+  const excludeScan = ['lexiword_token','lexi_accounts','lexi_snap_','lexi_last_view','lexi_last_user','lexilearn_'];
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i); if(!k) continue;
-    if(k==='lexiword_token') continue; // 排除登录 token
-    if(prefixes.some(p=>k.startsWith(p))){
+    if(excludeScan.some(function(p){ return k.indexOf(p) === 0; })) continue;
+    if(prefixes.some(function(p){ return k.indexOf(p) === 0; })){
       if(!(k in data)) add(k, localStorage.getItem(k));
     }
   }
@@ -3354,7 +3355,7 @@ function _clearLexiLocalStorage(keepToken, keepAccounts) {
   if (keepToken) protect.push('lexiword_token');
   if (keepAccounts) protect.push('lexi_accounts');
   var keysToRemove = [];
-  var prefixes = ['lexi_db_','wrev3_','checkin_','lexilearn_','lexi_ci_','lexi_sets_','lexi_pin_','lexi_vocab_bookmark_','lexi_visit_','lexi_snap_','lexi_last_view','lexi_last_user','lexi_custom_m_'];
+  var prefixes = ['lexi_db_','wrev3_','checkin_','lexi_ci_','lexi_sets_','lexi_pin_','lexi_vocab_bookmark_','lexi_visit_','lexi_last_view','lexi_last_user','lexi_custom_m_'];
   for (var i = localStorage.length - 1; i >= 0; i--) {
     var k = localStorage.key(i);
     if (!k) continue;
