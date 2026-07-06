@@ -295,7 +295,9 @@ body{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   aspect-ratio:1/1;
   -webkit-tap-highlight-color:transparent;
-  overflow:hidden; contain:layout style;
+  overflow:hidden; contain:layout style paint;
+  content-visibility:auto; contain-intrinsic-size:0 60px;
+  will-change:transform;
 }
 
 /* 修复：次数标签改为正值定位，避免被圆角切掉 */
@@ -523,6 +525,18 @@ body[data-cn-mode="always"][data-cn-detail="full"] .word-card .wc-cn{
 @keyframes spin{to{transform:rotate(360deg)}}
 .smenu-item{padding:13px 18px; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer; transition:background .15s; -webkit-tap-highlight-color:transparent;}
 .smenu-item:active{background:var(--surface-2);}
+
+/* ── 底部操作面板（我的/退出登录） ── */
+.sheet-overlay{display:none; position:fixed; inset:0; z-index:220; background:rgba(0,0,0,.45); backdrop-filter:blur(4px);}
+.sheet-overlay.show{display:block; animation:ovl-in .2s var(--ease);}
+.bottom-sheet{position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:var(--r-xl) var(--r-xl) 0 0; padding:0 0 calc(16px + var(--sab)) 0; box-shadow:0 -8px 30px rgba(0,0,0,.18); border-top:1px solid var(--border); transform:translateY(100%); transition:transform .28s var(--ease);}
+.sheet-overlay.show .bottom-sheet{transform:translateY(0);}
+.sheet-handle{width:40px; height:4px; background:var(--border); border-radius:2px; margin:12px auto;}
+.sheet-title{text-align:center; font-size:13px; font-weight:700; color:var(--ink-3); padding:0 20px 12px;}
+.sheet-item{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:16px; font-size:16px; font-weight:700; color:#C03030; background:none; border:none; border-top:1px solid var(--border); cursor:pointer; font-family:inherit;}
+.sheet-item:active{background:var(--surface-2);}
+.sheet-item.primary{color:var(--accent);}
+.sheet-cancel{margin-top:8px; color:var(--ink-2); font-weight:700;}
 
 /* ══════════════════════════════════════════════════════
    STUDY MODULE — 学习记录 & 备考笔记
@@ -1124,13 +1138,8 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 </head>
 <body>
 
-<!-- ── 顶部用户栏 ── -->
-<div style="display:flex;justify-content:flex-end;padding:8px 16px 0;gap:10px;">
-  <button onclick="doLogout()" style="padding:4px 12px;border:1px solid var(--border-s);background:var(--surface);color:var(--ink-2);border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;">退出登录</button>
-</div>
-
-
-<!-- ╔══ LexiLearn SVG Icon Sprite ══╗ -->
+<!-- ── 主体 ── -->
+<div id="page-area" class="page-area">
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <!-- flame: 打卡 -->
   <symbol id="ic-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -1223,6 +1232,17 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   <!-- bookmark: 书签 -->
   <symbol id="ic-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="4 21 4 4 12 9 20 4 20 21 12 16 4 21"/>
+  </symbol>
+  <!-- user: 我的 -->
+  <symbol id="ic-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </symbol>
+  <!-- logout: 退出登录 -->
+  <symbol id="ic-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <polyline points="16 17 21 12 16 7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
   </symbol>
 </svg>
 <!-- ╚══ End SVG Sprite ══╝ -->
@@ -1459,6 +1479,12 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
         <button class="detail-btn active" id="db-detail-brief" onclick="setDetailMode('brief')">简略</button>
         <button class="detail-btn" id="db-detail-full" onclick="setDetailMode('full')">详细</button>
       </div>
+      <div class="db-col-bar" style="margin:8px 0;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--ink-3);font-weight:700;">列数：</span>
+        <button class="detail-btn" id="db-cols-2" onclick="setDbDetailCols(2)">2列</button>
+        <button class="detail-btn active" id="db-cols-3" onclick="setDbDetailCols(3)">3列</button>
+        <button class="detail-btn" id="db-cols-4" onclick="setDbDetailCols(4)">4列</button>
+      </div>
       <div class="word-grid" id="db-wordgrid" style="margin-top:10px;"></div>
     </div>
   </div>
@@ -1496,6 +1522,9 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   <button class="bnav-item" data-target="sets" onclick="switchNav('sets')">
     <span class="bnav-icon"><svg style="width:22px;height:22px;display:block;" aria-hidden="true"><use href="#ic-folder"></use></svg></span><span>集合</span>
   </button>
+  <button class="bnav-item" id="profile-nav-btn" style="max-width:64px;" onclick="openProfileSheet(event)">
+    <span class="bnav-icon"><svg style="width:22px;height:22px;display:block;" aria-hidden="true"><use href="#ic-user"></use></svg></span><span>我的</span>
+  </button>
 </nav>
 
 <!-- ── 新建集合 Modal ── -->
@@ -1507,6 +1536,23 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
       <button class="modal-btn secondary" onclick="closeNewSetModal()">取消</button>
       <button class="modal-btn primary"   onclick="confirmNewSet()">确认</button>
     </div>
+  </div>
+</div>
+
+<!-- ── 我的 / 退出登录 底部面板 ── -->
+<div id="profile-sheet" class="sheet-overlay" onclick="if(event.target===this)closeProfileSheet()">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">我的</div>
+    <button class="sheet-item primary" onclick="openBackupModal();closeProfileSheet();">
+      <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-save"></use></svg>
+      数据备份与恢复
+    </button>
+    <button class="sheet-item" onclick="doLogout();closeProfileSheet();">
+      <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-logout"></use></svg>
+      退出登录
+    </button>
+    <button class="sheet-item sheet-cancel" onclick="closeProfileSheet()">取消</button>
   </div>
 </div>
 
@@ -1896,8 +1942,17 @@ function setCnMode(mode) {
   _cnMode = mode;
   localStorage.setItem('lexilearn_cnmode', mode);
   document.querySelectorAll('.cn-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  if (mode === 'always') document.querySelectorAll('.word-card').forEach(c => c.classList.add('peek'));
-  else document.querySelectorAll('.word-card').forEach(c => c.classList.remove('peek'));
+  const cards = document.querySelectorAll('.word-card');
+  if (mode === 'always') {
+    // 切换到常显时，确保每个卡片都有 wc-cn 元素
+    cards.forEach(c => {
+      let cn = c.querySelector('.wc-cn');
+      if (!cn) { cn = document.createElement('div'); cn.className = 'wc-cn'; cn.textContent = c.dataset.fullm || ''; c.appendChild(cn); }
+      c.classList.add('peek');
+    });
+  } else {
+    cards.forEach(c => c.classList.remove('peek'));
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2009,6 +2064,10 @@ function renderDaybookDetail(dayNum) {
   if(el_m)el_m.style.width=(_m2/_t2*100).toFixed(1)+'%';
   if(el_f)el_f.style.width=(_f2/_t2*100).toFixed(1)+'%';
   const grid=document.getElementById('db-wordgrid'); grid.innerHTML='';
+  const dbCols=parseInt(localStorage.getItem('lexilearn_dbcols')||'3');
+  if(dbCols!==3)grid.setAttribute('data-cols',dbCols);
+  else grid.removeAttribute('data-cols');
+  [2,3,4].forEach(c=>document.getElementById('db-cols-'+c)?.classList.toggle('active',c===dbCols));
   const frag=document.createDocumentFragment();
   words.forEach(entry=>{
     const state=dbGetState(dayNum,entry.w);
@@ -2019,18 +2078,36 @@ function renderDaybookDetail(dayNum) {
     div.dataset.word=entry.w; div.dataset.state=state; div.dataset.day=dayNum; div.dataset.fullm=entry.m||'';
     if(starred) div.dataset.starred='1';
     div.appendChild(_makeStarBtn(starred));
+    // 大纲词详情也加书签按钮（全局 .vocab-bm-btn click 监听会处理）
+    const bmBtn=document.createElement('button');
+    bmBtn.className='vocab-bm-btn';
+    bmBtn.setAttribute('aria-label','书签');
+    bmBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    bmBtn.title='设为书签';
+    if(localCache.bookmark===entry.w){
+      bmBtn.classList.add('active'); bmBtn.title='取消书签';
+      div.dataset.bookmarked='1';
+    }
+    div.insertBefore(bmBtn, div.firstChild);
+    div.dataset.bmInit='1';
     const enEl=document.createElement('div'); enEl.className='wc-en'; enEl.dataset.len=_wcLenClass(entry.w); enEl.textContent=entry.w;
     div.appendChild(enEl);
-    const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=entry.m||'';
-    div.appendChild(cnEl);
+    if(_cnMode==='always'){
+      const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=entry.m||'';
+      div.appendChild(cnEl);
+    }
     frag.appendChild(div);
   });
   grid.appendChild(frag);
   _dbOrigOrder=Array.from(grid.querySelectorAll('.word-card')).map(c=>c.dataset.word);
-  if(_cnMode==='always')grid.querySelectorAll('.word-card').forEach(c=>c.classList.add('peek'));
+  if(_cnMode==='always')grid.querySelectorAll('.word-card').forEach(c=>{
+    if(!c.querySelector('.wc-cn')){const cn=document.createElement('div');cn.className='wc-cn';cn.textContent=c.dataset.fullm||'';c.appendChild(cn);}
+    c.classList.add('peek');
+  });
   grid.onclick=function(e){
     const card=e.target.closest('.word-card'); if(!card)return;
     if(e.target.closest('.db-star-btn')){toggleStar(card);return;}
+    if(e.target.closest('.vocab-bm-btn')) return;
     if(e.target.classList.contains('wc-tog')){toggleBrief(card,e.target);return;}
     if(_cnMode==='peek')peekCard(card);
     const newState=dbCycleState(dayNum,card.dataset.word);
@@ -2194,6 +2271,7 @@ function renderVocabGrid(){
       if(_vocabFilters.has('star')&&!next){card.remove();}
       return;
     }
+    if(e.target.closest('.vocab-bm-btn')) return;
     peekCard(card);
   };
   attachLongPress(grid);
@@ -2218,8 +2296,10 @@ function _vocabChunk(grid){
     div.appendChild(_makeStarBtn(star));
     const enEl=document.createElement('div'); enEl.className='wc-en'; enEl.dataset.len=_wcLenClass(w); enEl.textContent=w;
     div.appendChild(enEl);
-    const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=m;
-    div.appendChild(cnEl);
+    if(_cnMode==='always'){
+      const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=m;
+      div.appendChild(cnEl);
+    }
     frag.appendChild(div);
   }
   const old=document.getElementById('vocab-load-more'); if(old)old.remove();
@@ -2293,6 +2373,15 @@ function setVocabCols(n){
   }
   [2,3,4].forEach(c=>document.getElementById('vocab-cols-'+c)?.classList.toggle('active',c===n));
 }
+function setDbDetailCols(n){
+  localStorage.setItem('lexilearn_dbcols', n);
+  const grid=document.getElementById('db-wordgrid');
+  if(grid){
+    if(n===3)grid.removeAttribute('data-cols');
+    else grid.setAttribute('data-cols',n);
+  }
+  [2,3,4].forEach(c=>document.getElementById('db-cols-'+c)?.classList.toggle('active',c===n));
+}
 function copyVocabWords(){
   const words=_vocabFiltered.length?_vocabFiltered:_vocabAllWords;
   if(!words.length){alert('没有可复制');return;}
@@ -2308,7 +2397,12 @@ function copyVocabWords(){
 ═══════════════════════════════════════════════════════ */
 const SETS_KEY='lexi_sets_v1';
 function getSets(){ return localCache.sets; }
-function saveSets(s){ localCache.sets=s; apiFetchSilent('POST','/api/sets/sync',{sets:s}); }
+function saveSets(s){
+  localCache.sets=s;
+  // 本地持久化兜底：即使后端失败，数据也不会丢
+  try { localStorage.setItem(SETS_KEY, JSON.stringify(s)); } catch(e){}
+  apiFetchSilent('POST','/api/sets/sync',{sets:s});
+}
 let _editingSetId=null;
 
 function getMeaning(word){
@@ -2350,8 +2444,10 @@ function buildSetsPage(){
         card.appendChild(_makeStarBtn(starred));
         const enEl=document.createElement('div'); enEl.className='wc-en'; enEl.dataset.len=_wcLenClass(word); enEl.textContent=word;
         card.appendChild(enEl);
-        const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=m;
-        card.appendChild(cnEl);
+        if(_cnMode==='always'){
+          const cnEl=document.createElement('div'); cnEl.className='wc-cn'; cnEl.textContent=m;
+          card.appendChild(cnEl);
+        }
         grid.appendChild(card);
       });
       grid.onclick=function(e){
@@ -2382,8 +2478,14 @@ function closeNewSetModal(){document.getElementById('new-set-modal').classList.r
 function confirmNewSet(){
   const name=document.getElementById('new-set-name').value.trim(); if(!name)return;
   const sets=getSets();
-  if(_editingSetId){const s=sets.find(s=>s.id===_editingSetId);if(s){s.name=name;saveSets(sets);buildSetsPage();}}
-  else{sets.push({id:'set_'+Date.now(),name,words:[],createdAt:Date.now()});saveSets(sets);buildSetsPage();}
+  if(_editingSetId){
+    const s=sets.find(s=>s.id===_editingSetId);
+    if(s){s.name=name;saveSets(sets);buildSetsPage();showToast('✅ 已重命名为「'+name+'」');}
+  }else{
+    sets.push({id:'set_'+Date.now(),name,words:[],createdAt:Date.now()});
+    saveSets(sets); buildSetsPage();
+    showToast('✅ 集合「'+name+'」已创建');
+  }
   closeNewSetModal();
 }
 function renameSet(setId){
@@ -2443,6 +2545,13 @@ function confirmAddWordToSet() {
 let _peekCard=null, _peekTimer=null;  // 全局单 timer，避免大量并发 setTimeout
 function peekCard(card){
   if(_cnMode!=='peek')return;
+  // 如果卡片还没有中文释义元素，按需创建（减少初始 DOM 节点数）
+  let cnEl=card.querySelector('.wc-cn');
+  if(!cnEl){
+    cnEl=document.createElement('div'); cnEl.className='wc-cn';
+    cnEl.textContent=card.dataset.fullm||'';
+    card.appendChild(cnEl);
+  }
   // 清除上一张
   if(_peekCard&&_peekCard!==card){_peekCard.classList.remove('peek');clearTimeout(_peekTimer);}
   card.classList.add('peek');
@@ -2740,19 +2849,29 @@ function renderPins(gridId){
    数据备份与恢复
 ═══════════════════════════════════════════════════════ */
 function _collectBackupData(){
-  const data={};let count=0;
-  // Collect from localCache (which is synced from API)
-  for(const key in localCache.states){
-    data['lexi_db_'+key]=String(localCache.states[key]); count++;
+  const data={};
+  const add=(k,v)=>{ data[k]=v; };
+
+  // 1. 从 localCache 同步核心学习数据
+  for(const key in localCache.states){ add('lexi_db_'+key, String(localCache.states[key])); }
+  for(const w of localCache.starred){ add('wrev3_star_'+w, '1'); }
+  if(Object.keys(localCache.checkin||{}).length) add('lexi_ci_v1', JSON.stringify(localCache.checkin));
+  if((localCache.sets||[]).length) add('lexi_sets_v1', JSON.stringify(localCache.sets));
+  if(Object.keys(localCache.pins||{}).length) add('lexi_pin_v1', JSON.stringify(localCache.pins));
+  if(localCache.bookmark) add('lexi_vocab_bookmark_v1', localCache.bookmark);
+  if(Object.keys(localCache.visitDays||{}).length) add('lexi_visit_v1', JSON.stringify(localCache.visitDays));
+
+  // 2. 直接扫描 localStorage，补充未同步到 localCache 的导入数据、自定义释义等
+  const prefixes = ['lexi_','wrev3_','checkin_'];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i); if(!k) continue;
+    if(k==='lexiword_token') continue; // 排除登录 token
+    if(prefixes.some(p=>k.startsWith(p))){
+      if(!(k in data)) add(k, localStorage.getItem(k));
+    }
   }
-  for(const w of localCache.starred){
-    data['wrev3_star_'+w]='1'; count++;
-  }
-  data['lexi_ci_v1']=JSON.stringify(localCache.checkin); count++;
-  data['lexi_sets_v1']=JSON.stringify(localCache.sets); count++;
-  data['lexi_pin_v1']=JSON.stringify(localCache.pins); count++;
-  if(localCache.bookmark){ data['lexi_vocab_bookmark_v1']=localCache.bookmark; count++; }
-  return {data,count};
+
+  return {data, count:Object.keys(data).length};
 }
 
 function openBackupModal(){
@@ -3012,30 +3131,7 @@ function _safeCopy(text, onSuccess, onFail) {
 }
 
 /* ── 右侧滚动进度滑块 ── */
-(function(){
-  const pa = document.getElementById('page-area');
-  const rail = document.querySelector('.scroll-rail-wrap');
-  const thumb = document.querySelector('.scroll-rail-thumb');
-  if (!pa || !rail || !thumb) return;
-
-  let _hideTimer;
-  function updateRail() {
-    const scrollTop = pa.scrollTop;
-    const scrollHeight = pa.scrollHeight - pa.clientHeight;
-    if (scrollHeight <= 50) { rail.classList.remove('visible'); return; }
-    const pct = scrollTop / scrollHeight;
-    const trackH = rail.offsetHeight;
-    const thumbH = Math.max(24, trackH * (pa.clientHeight / pa.scrollHeight));
-    thumb.style.height = thumbH + 'px';
-    thumb.style.top = Math.min(pct * (trackH - thumbH), trackH - thumbH) + 'px';
-    rail.classList.add('visible');
-    clearTimeout(_hideTimer);
-    _hideTimer = setTimeout(() => rail.classList.remove('visible'), 1200);
-  }
-  pa.addEventListener('scroll', updateRail, { passive: true });
-  // Update on nav switch
-  window.addEventListener('lexiNavChange', updateRail);
-})();
+// 详细实现已移至页面底部 IIFE（vocab 专用，包含书签标记）
 
 /* ── 词库状态统计 ── */
 function updateVocabStats() {
@@ -3080,6 +3176,14 @@ async function initData() {
     localCache.sets = sets || [];
     localCache.pins = pins || {};
     localCache.bookmark = bookmark.word || '';
+    // 如果后端某些模块为空，用 localStorage 兜底合并（避免导入数据被清空）
+    try {
+      if(!Object.keys(localCache.checkin).length) localCache.checkin = JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}');
+      if(!localCache.sets.length) localCache.sets = JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]');
+      if(!Object.keys(localCache.pins).length) localCache.pins = JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}');
+      if(!localCache.bookmark) localCache.bookmark = localStorage.getItem('lexi_vocab_bookmark_v1')||'';
+      if(!Object.keys(localCache.visitDays).length) localCache.visitDays = JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
+    } catch(e){}
     // Merge localStorage backup data (takes priority over empty backend)
     _mergeLocalStorageIntoCache();
     _useRemote = true;
@@ -3115,6 +3219,7 @@ function _restoreFromLocalStorage() {
   try { localCache.checkin = JSON.parse(localStorage.getItem('lexi_ci_v1')||'{}'); } catch(e) {}
   try { localCache.sets = JSON.parse(localStorage.getItem('lexi_sets_v1')||'[]'); } catch(e) {}
   try { localCache.pins = JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}'); } catch(e) {}
+  try { localCache.visitDays = JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}'); } catch(e) {}
   localCache.bookmark = localStorage.getItem('lexi_vocab_bookmark_v1')||'';
   _dataReady = true;
 }
@@ -3144,6 +3249,11 @@ function _mergeLocalStorageIntoCache() {
       if(!localCache.starred.includes(w))localCache.starred.push(w);
     }
   }
+  // Merge visit days and other structured data
+  try {
+    const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
+    Object.assign(localCache.visitDays, vd);
+  } catch(e){}
 }
 
 // ── Logout ──
@@ -3151,6 +3261,17 @@ function doLogout() {
   clearToken();
   localStorage.removeItem('lexiword_token');
   window.location.href = 'login.html';
+}
+
+// ── Profile / 我的 底部面板 ──
+function openProfileSheet(e) {
+  if (e) e.stopPropagation();
+  const sheet = document.getElementById('profile-sheet');
+  if (sheet) sheet.classList.add('show');
+}
+function closeProfileSheet() {
+  const sheet = document.getElementById('profile-sheet');
+  if (sheet) sheet.classList.remove('show');
 }
 
 // ── Startup: validate token, load data ──
@@ -3187,7 +3308,8 @@ function doLogout() {
 .vocab-bookmark-chip .bm-clear{margin-left:2px; opacity:.4; font-size:13px; line-height:1; cursor:pointer;}
 .vocab-bookmark-chip .bm-clear:hover{opacity:.8;}
 /* vocab-bm-btn 样式已在主 CSS 中定义（左上角绝对定位） */
-#vocab-grid .word-card[data-bookmarked="1"]{
+#vocab-grid .word-card[data-bookmarked="1"],
+#db-wordgrid .word-card[data-bookmarked="1"]{
   box-shadow:0 0 0 2px rgba(76,82,232,.2), var(--sh-sm);
 }
 .scroll-rail-mark{
@@ -3255,7 +3377,7 @@ function doLogout() {
   function refreshCards(){
     const bookmark=getBookmark();
     // 1. 给新卡片注入书签按钮（直接插入卡片，左上角绝对定位）
-    document.querySelectorAll('#vocab-grid .word-card:not([data-bm-init])').forEach(card=>{
+    document.querySelectorAll('#vocab-grid .word-card:not([data-bm-init]), #db-wordgrid .word-card:not([data-bm-init])').forEach(card=>{
       if(!card.querySelector('.vocab-bm-btn')){
         const btn=document.createElement('button');
         btn.className='vocab-bm-btn';
@@ -3266,19 +3388,19 @@ function doLogout() {
       card.dataset.bmInit='1';
     });
     // 2. 书签状态：只更新旧书签卡 + 新书签卡，O(1) 而非 O(n)
-    document.querySelectorAll('#vocab-grid .word-card[data-bookmarked]').forEach(card=>{
+    document.querySelectorAll('#vocab-grid .word-card[data-bookmarked], #db-wordgrid .word-card[data-bookmarked]').forEach(card=>{
       if(card.dataset.word===bookmark) return; // 仍是书签，跳过
       const btn=card.querySelector('.vocab-bm-btn');
       if(btn){btn.classList.remove('active');btn.title='设为书签';}
       delete card.dataset.bookmarked;
     });
     if(bookmark){
-      const card=document.querySelector('#vocab-grid .word-card[data-word="'+bookmark.replace(/"/g,'&quot;')+'"]');
-      if(card){
+      const safe=bookmark.replace(/"/g,'&quot;');
+      document.querySelectorAll('#vocab-grid .word-card[data-word="'+safe+'"], #db-wordgrid .word-card[data-word="'+safe+'"]').forEach(card=>{
         const btn=card.querySelector('.vocab-bm-btn');
         if(btn){btn.classList.add('active');btn.title='取消书签';}
         card.dataset.bookmarked='1';
-      }
+      });
     }
   }
   let _railRafId=null;
@@ -3300,17 +3422,11 @@ function doLogout() {
       return;
     }
     const trackH=rail.offsetHeight;
-    // 基于单词索引定位：O(1) 滚动估算，避免 BoundingClientRect 循环
-    const totalWords=(_vocabFiltered&&_vocabFiltered.length)||1;
-    const renderedWords=Math.max(_vocabRenderedCount||1,1);
-    // 用滚动比例 × 已渲染词数估算顶部词索引，O(1)
-    const scrollRatio=pa.scrollTop/scrollHeight;
-    const topIdx=Math.min(Math.floor(scrollRatio*renderedWords),totalWords-1);
-    const virtualPct=totalWords>1?Math.min(topIdx/(totalWords-1),1):scrollRatio;
-    const estimatedTotalH=pa.scrollHeight*(totalWords/renderedWords);
-    const thumbH=Math.max(10,Math.min(trackH*0.45,trackH*(pa.clientHeight/estimatedTotalH)));
+    // 用真实滚动比例计算滑块位置（不再用虚拟估算）
+    const pct=Math.min(Math.max(pa.scrollTop/scrollHeight,0),1);
+    const thumbH=Math.max(24,trackH*(pa.clientHeight/pa.scrollHeight));
     thumb.style.height=thumbH+'px';
-    thumb.style.top=Math.min(virtualPct*(trackH-thumbH),trackH-thumbH)+'px';
+    thumb.style.top=Math.min(pct*(trackH-thumbH),trackH-thumbH)+'px';
 
     const bookmark=getBookmark();
     const markCard=bookmark ? document.querySelector('#vocab-grid .word-card[data-word="'+bookmark.replace(/"/g,'&quot;')+'"]') : null;
@@ -3320,7 +3436,7 @@ function doLogout() {
       const cardY=cardRect.top-paRect.top+pa.scrollTop;
       const totalH=pa.scrollHeight-pa.clientHeight;
       if(totalH>0){
-        const markPct=Math.min(cardY/totalH,1);
+        const markPct=Math.min(Math.max(cardY/totalH,0),1);
         mark.style.top=Math.min(markPct*(trackH-10),trackH-10)+'px';
         mark.style.display='block';
       }else{mark.style.display='none';}
@@ -3348,6 +3464,7 @@ function doLogout() {
     refreshAll();
     if(typeof showToast==='function') showToast(next?'已记录词库书签':'已清除词库书签');
   }
+  window.toggleBookmark=toggleBookmark;
 
   window.clearVocabBookmark=function(){
     if(!getBookmark()) return;
