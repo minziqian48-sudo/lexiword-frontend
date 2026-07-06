@@ -3104,45 +3104,46 @@ function doExportFile(){
   const json=JSON.stringify(data,null,2);
   const filename='LexiLearn_backup_'+new Date().toISOString().slice(0,10)+'.json';
 
-  if (typeof plus !== 'undefined' && plus.io) {
+  // ── HBuilderX App：优先通过 index.html 壳的原生桥接保存 ──
+  if (typeof plus !== 'undefined') {
     try {
-      plus.io.resolveLocalFileSystemURL('_downloads/', function(entry) {
+      var launchWv = plus.webview.getLaunchWebview();
+      if (launchWv && launchWv.evalJS) {
+        launchWv.evalJS(
+          'if(window._lexiExportBackup) _lexiExportBackup(' +
+          JSON.stringify(json) + ',' + JSON.stringify(filename) + ')'
+        );
+        showToast('正在保存备份…');
+        closeBackupModal();
+        return;
+      }
+    } catch(e) {}
+    // 兜底：直接用 plus.io
+    try {
+      function fallbackShare() {
+        try { plus.share.sendWithSystem({type:'text',content:json,title:filename},function(){},function(){}); }
+        catch(e2) { doExportCopy(); }
+      }
+      function tryWrite(entry) {
         entry.getFile(filename, {create:true}, function(fileEntry) {
           fileEntry.createWriter(function(writer) {
-            writer.onwrite = function() {
-              const localUrl=fileEntry.toLocalURL();
-              showToast('已保存到下载目录：'+filename);
-              if (plus.share && plus.share.sendWithSystem) {
-                plus.share.sendWithSystem(
-                  {type:'text', content: json, href:localUrl, title:filename},
-                  function(){},
-                  function(e){}
-                );
-              }
-            };
-            writer.onerror = function() {
-              showToast('文件保存失败，已改为复制');
-              doExportCopy();
-            };
+            writer.onwrite = function() { showToast('已保存：'+filename); fallbackShare(); };
+            writer.onerror = fallbackShare;
             writer.seek(0);
             writer.write(json);
-          }, function(){
-            showToast('无法创建备份文件，已改为复制');
-            doExportCopy();
-          });
-        }, function(){
-          showToast('无法打开备份文件，已改为复制');
-          doExportCopy();
-        });
-      }, function(){
-        showToast('无法访问下载目录，已改为复制');
-        doExportCopy();
+          }, fallbackShare);
+        }, fallbackShare);
+      }
+      plus.io.resolveLocalFileSystemURL('_downloads/', tryWrite, function() {
+        plus.io.requestFileSystem(plus.io.PUBLIC_DOWNLOADS, tryWrite, fallbackShare);
       });
+      showToast('正在保存备份…');
+      closeBackupModal();
+      return;
     } catch(e) {
-      showToast('文件导出异常，已改为复制');
       doExportCopy();
+      return;
     }
-    return;
   }
 
   _downloadBlob(new Blob([json], {type:'application/json;charset=utf-8'}), filename);
