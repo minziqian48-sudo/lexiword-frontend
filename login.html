@@ -192,7 +192,6 @@ async function doLogin() {
 
   try {
     const data = await apiPost('/auth/login', {email, password: pwd});
-    clearOldAppData(); // 清除旧账号本地数据
     setToken(data.token);
     window.location.href = 'Lexiword.html';
   } catch (e) {

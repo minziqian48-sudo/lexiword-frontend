@@ -1543,7 +1543,11 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 <div id="profile-sheet" class="sheet-overlay" onclick="if(event.target===this)closeProfileSheet()">
   <div class="bottom-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">我的</div>
+    <div class="sheet-title" id="sheet-user-email">我的</div>
+    <button class="sheet-item primary" onclick="doSwitchAccount();closeProfileSheet();">
+      <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-user"></use></svg>
+      切换账号
+    </button>
     <button class="sheet-item primary" onclick="openBackupModal();closeProfileSheet();">
       <svg style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-save"></use></svg>
       数据备份与恢复
@@ -1660,7 +1664,7 @@ function clearToken()  { localStorage.removeItem(TOKEN_KEY); }
 
 // 内存缓存
 const localCache = { states:{}, starred:[], checkin:{}, sets:[], pins:{}, bookmark:'', visitDays:{}, meanings:{} };
-let _dataReady = false, _useRemote = false, _tokenValid = false;
+let _dataReady = false, _useRemote = false, _tokenValid = false, _currentUser = null;
 
 // 通用 fetch 封装（自动携带 Token、401 跳转）
 async function apiFetch(method, path, body) {
@@ -2947,6 +2951,15 @@ function _processImport(text){
   const entries=Object.entries(data).filter(([k])=>k&&prefixes.some(p=>k.startsWith(p)));
   if(!entries.length){_setImportInfo('❌ 未找到有效的备份数据','#e74c3c');return;}
   entries.forEach(([k,v])=>localStorage.setItem(k,v));
+  // 同步导入数据到后端（防止切换账号后丢失）
+  try {
+    const backupData = {};
+    entries.forEach(([k,v]) => backupData[k] = v);
+    if (_currentUser && _currentUser.id) {
+      _saveAccountSnapshot(_currentUser.id);
+      apiFetchSilent('POST', '/api/restore', {data: backupData});
+    }
+  } catch(e) {}
   if(typeof invalidateVocabCache==='function')invalidateVocabCache();
   _setImportInfo('✅ 成功导入 '+entries.length+' 条数据！页面将刷新…','#27ae60');
   showToast('✅ 导入成功！正在刷新…');
@@ -3278,9 +3291,43 @@ function _mergeLocalStorageIntoCache() {
   } catch(e){}
 }
 
-// ── Logout ──
+// ── 账号快照：按 user ID 保存/恢复 localStorage ──
+function _saveAccountSnapshot(userId) {
+  const snap = _collectBackupData().data;
+  localStorage.setItem('lexi_snap_' + userId, JSON.stringify(snap));
+}
+
+function _restoreAccountSnapshot(userId) {
+  try {
+    const raw = localStorage.getItem('lexi_snap_' + userId);
+    if (!raw) return;
+    const snap = JSON.parse(raw);
+    let count = 0;
+    for (const [k, v] of Object.entries(snap)) {
+      if (!localStorage.getItem(k)) {
+        localStorage.setItem(k, v);
+        count++;
+      }
+    }
+    if (count > 0) _mergeLocalStorageIntoCache();
+  } catch(e) {}
+}
+
+function _clearGenericData() {
+  const prefixes = ['lexi_db_','wrev3_star_','lexi_ci_v1','lexi_sets_v1','lexi_pin_v1','lexi_vocab_bookmark_v1','lexi_visit_v1'];
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && prefixes.some(p => k.startsWith(p))) {
+      localStorage.removeItem(k);
+    }
+  }
+  // Also clear the _user tracking
+  localStorage.removeItem('lexi_last_user');
+}
+
+// ── Logout / Switch Account ──
 function doLogout() {
-  // 清除所有 LexiLearn 相关 localStorage 数据（防止账号间数据泄露）
+  // 清除所有 LexiLearn 相关 localStorage 数据（包括快照）
   const prefixes = ['lexi_','wrev3_','checkin_','lexilearn_'];
   for(let i=localStorage.length-1;i>=0;i--){
     const k=localStorage.key(i);
@@ -3293,10 +3340,22 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
+function doSwitchAccount() {
+  // 保存当前账号快照，清临时数据，跳转登录
+  if (_currentUser && _currentUser.id) {
+    _saveAccountSnapshot(_currentUser.id);
+    _clearGenericData();
+  }
+  localStorage.removeItem('lexiword_token');
+  window.location.href = 'login.html';
+}
+
 // ── Profile / 我的 底部面板 ──
 function openProfileSheet(e) {
   if (e) e.stopPropagation();
   const sheet = document.getElementById('profile-sheet');
+  const emailEl = document.getElementById('sheet-user-email');
+  if (emailEl && _currentUser) emailEl.textContent = _currentUser.email || '我的';
   if (sheet) sheet.classList.add('show');
 }
 function closeProfileSheet() {
@@ -3309,7 +3368,10 @@ function closeProfileSheet() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
   apiFetch('GET', '/api/auth/me').then(user => {
+    _currentUser = user;
     _tokenValid = true;
+    // 先恢复该账号的快照数据（如果之前切换过账号）
+    _restoreAccountSnapshot(user.id);
     return initData();
   }).then(() => {
     // Kick off the original startup (default tab: checkin)
