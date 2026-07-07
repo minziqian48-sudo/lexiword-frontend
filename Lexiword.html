@@ -3372,29 +3372,6 @@ function doExportShare(){
 }
 
 
-function doExportCopy(){
-  const backup = _cachedBackup || _collectBackupData();
-  const {data,count}=backup;
-  if(!count){showToast('暂无数据可复制');return;}
-  const json=JSON.stringify(data,null,2);
-  const btn=document.getElementById('backup-copy-btn');
-  _safeCopy(json,
-    ()=>{if(btn){btn.innerHTML='<svg style="width:14px;height:14px;stroke:#fff;margin-right:4px;vertical-align:-2px;" aria-hidden="true"><use href="#ic-check"></use></svg> 已复制';setTimeout(()=>{btn.innerHTML='<svg style="width:14px;height:14px;margin-right:4px;vertical-align:-2px;" aria-hidden="true"><use href="#ic-copy"></use></svg> 复制JSON';},2500);}showToast('备份已复制到剪切板');},
-    ()=>{showToast('复制失败，请优先使用“下载备份文件”');}
-  );
-}
-
-function _safeCopy(text, onSuccess, onFail) {
-  if (typeof plus !== 'undefined' && plus.clipboard) {
-    plus.clipboard.setClipboardData(text,
-      function() { if (onSuccess) onSuccess(); },
-      function() { _execCmdCopy(text, onSuccess, onFail); }
-    );
-    return;
-  }
-  _execCmdCopy(text, onSuccess, onFail);
-}
-
 /* ── 右侧滚动进度滑块 ── */
 // 详细实现已移至页面底部 IIFE（vocab 专用，包含书签标记）
 
