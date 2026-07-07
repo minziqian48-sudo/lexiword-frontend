@@ -75,7 +75,8 @@ body{
 
 /* APP SHELL */
 #app-shell{display:flex; flex-direction:column; height:100%; overflow:hidden;}
-#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size; padding-bottom:calc(var(--nav-h) + var(--sab));}
+#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size; padding-bottom:calc(var(--nav-h) + var(--sab)); scrollbar-width:none; -ms-overflow-style:none;}
+#page-area::-webkit-scrollbar{display:none;}
 
 /* BOTTOM NAV — 温暖极简 */
 #bottom-nav{
@@ -734,15 +735,19 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
 
 /* ── 滚动进度导轨 ── */
 .scroll-rail-wrap{
-  position:fixed; right:4px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
-  width:4px; z-index:60; pointer-events:none; opacity:0; transition:opacity .3s;
+  position:fixed; right:3px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
+  width:6px; z-index:60; pointer-events:none; opacity:0; transition:opacity .35s;
+  display:flex; justify-content:center;
 }
 .scroll-rail-wrap.visible{opacity:1;}
-.scroll-rail-track{width:4px;height:100%;background:var(--border);border-radius:2px;position:relative;}
+.scroll-rail-track{width:4px;height:100%;background:var(--border);border-radius:2px;position:relative; overflow:hidden;}
 .scroll-rail-thumb{
   position:absolute;left:0;width:4px;border-radius:2px;
-  background:var(--accent);min-height:24px;transition:top .1s linear;
+  background:var(--accent); min-height:24px; cursor:pointer; pointer-events:auto;
+  transition:height .15s ease, top .08s linear;
+  box-shadow: 0 0 6px rgba(196,149,106,.25);
 }
+.scroll-rail-thumb:active{background:var(--accent-2); width:5px; box-shadow:0 0 8px rgba(196,149,106,.4);}
 /* 字母导轨（词库页面） */
 .alpha-rail{
   position:fixed; right:3px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
@@ -1259,6 +1264,11 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 <!-- ── 侧滑栏 ── -->
 
 <!-- ── 主体 ── -->
+<!-- 自定义滚动滑轨（词库/集合等长页面使用） -->
+<div class="scroll-rail-wrap" id="scrollRail">
+  <div class="scroll-rail-track"><div class="scroll-rail-thumb" id="scrollThumb"></div></div>
+</div>
+
 <div id="page-area" class="page-area">
 
   <!-- ══ 打卡首页 ══ -->
@@ -3065,6 +3075,88 @@ document.addEventListener('DOMContentLoaded', () => {
   // Android back history init
   history.replaceState({page:'checkin'}, '');
   history.pushState({page:'checkin'}, '');
+
+  // ── 自定义滚动滑轨 ──
+  (function(){
+    const pa = document.getElementById('page-area');
+    const rail = document.getElementById('scrollRail');
+    const thumb = document.getElementById('scrollThumb');
+    if (!pa || !rail || !thumb) return;
+    let rafId = null;
+    let hideTimer = null;
+    let dragging = false;
+    const MIN_THUMB = 24;
+    const SHOW_DELAY = 1200;
+
+    function update() {
+      if (dragging) return; // 拖拽时由拖拽逻辑控制位置
+      const sh = pa.scrollHeight;
+      const ch = pa.clientHeight;
+      const st = pa.scrollTop;
+      if (sh <= ch + 1) { rail.classList.remove('visible'); return; }
+      rail.classList.add('visible');
+      const ratio = Math.max(0.12, ch / sh);
+      const trackH = rail.clientHeight;
+      const thumbH = Math.max(MIN_THUMB, ratio * trackH);
+      const maxTop = trackH - thumbH;
+      const thumbTop = sh > ch ? (st / (sh - ch)) * maxTop : 0;
+      thumb.style.height = thumbH + 'px';
+      thumb.style.top = thumbTop + 'px';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => { if (!dragging) rail.classList.remove('visible'); }, SHOW_DELAY);
+    }
+
+    // ── 拖拽滚动 ──
+    function onDragStart(e) {
+      e.preventDefault();
+      dragging = true;
+      rail.classList.add('visible');
+      clearTimeout(hideTimer);
+      thumb.style.transition = 'none';
+      document.body.style.userSelect = 'none';
+      onDragMove(e);
+    }
+    function onDragMove(e) {
+      if (!dragging) return;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const trackRect = rail.getBoundingClientRect();
+      const trackH = trackRect.height;
+      const thumbH = thumb.offsetHeight;
+      let y = clientY - trackRect.top - thumbH / 2;
+      y = Math.max(0, Math.min(y, trackH - thumbH));
+      thumb.style.top = y + 'px';
+      // 反算滚动位置
+      const sh = pa.scrollHeight;
+      const ch = pa.clientHeight;
+      const maxTop = trackH - thumbH;
+      const scrollT = maxTop > 0 ? (y / maxTop) * (sh - ch) : 0;
+      pa.scrollTop = scrollT;
+    }
+    function onDragEnd() {
+      if (!dragging) return;
+      dragging = false;
+      thumb.style.transition = '';
+      document.body.style.userSelect = '';
+      hideTimer = setTimeout(() => { rail.classList.remove('visible'); }, SHOW_DELAY);
+    }
+
+    // Mouse events
+    thumb.addEventListener('mousedown', onDragStart);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    // Touch events
+    thumb.addEventListener('touchstart', onDragStart, {passive:false});
+    document.addEventListener('touchmove', onDragMove, {passive:false});
+    document.addEventListener('touchend', onDragEnd);
+
+    // Scroll listener (RAF throttled)
+    pa.addEventListener('scroll', function() {
+      if (rafId === null) rafId = requestAnimationFrame(function(){ update(); rafId = null; });
+    }, {passive:true});
+
+    window.addEventListener('resize', update, {passive:true});
+    setTimeout(update, 500);
+  })();
 });
 /* ── 全局详略模式 ── */
 let _detailMode = localStorage.getItem('lexi_detail_mode') || 'brief';
