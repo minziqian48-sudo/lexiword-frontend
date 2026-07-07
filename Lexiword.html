@@ -3426,6 +3426,15 @@ function updateVocabStats() {
 async function initData() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
+
+  // ★ 保存快照恢复的数据（_restoreAccountSnapshot 已在 initData 之前执行）
+  const _snapStates = Object.assign({}, localCache.states);
+  const _snapStarred = localCache.starred.slice();
+  const _snapCheckin = Object.assign({}, localCache.checkin);
+  const _snapSets = localCache.sets.slice();
+  const _snapPins = Object.assign({}, localCache.pins);
+  const hadLocalData = Object.keys(_snapStates).length > 0 || _snapStarred.length > 0 || Object.keys(_snapCheckin).length > 0;
+
   try {
     const [states, checkin, sets, pins, bookmark] = await Promise.all([
       apiFetch('GET', '/states'),
@@ -3435,25 +3444,87 @@ async function initData() {
       apiFetch('GET', '/bookmark'),
     ]);
     console.log('[STARTUP] initData API response: states=' + Object.keys(states.states||{}).length + ' starred=' + (states.starred||[]).length + ' sets=' + (sets||[]).length);
-    localCache.states = states.states || {};
-    localCache.starred = states.starred || [];
+
+    // ★ 合并策略：本地快照优先（用户最近操作），服务器数据补全
+    // states: 本地有则保留本地，无则用服务器
+    const remoteStates = states.states || {};
+    localCache.states = Object.assign({}, remoteStates, _snapStates);
+
+    // starred: 合并去重
+    const remoteStarred = states.starred || [];
+    localCache.starred = [...new Set([..._snapStarred, ...remoteStarred])];
+
+    // visitDays
     localCache.visitDays = states.visit_days || {};
-    localCache.checkin = checkin.records || {};
+
+    // checkin: 合并（本地和服务器取并集）
+    const remoteCheckin = checkin.records || {};
+    localCache.checkin = Object.assign({}, remoteCheckin, _snapCheckin);
+
+    // sets: 用服务器版（集合是结构化数据，以服务器为准；如果本地有额外的也保留）
     localCache.sets = sets || [];
+    if (_snapSets.length && (!localCache.sets.length)) localCache.sets = _snapSets;
+
+    // pins, bookmark: 以服务器为准，本地兜底
     localCache.pins = pins || {};
+    if (!Object.keys(localCache.pins).length && Object.keys(_snapPins).length) localCache.pins = _snapPins;
     localCache.bookmark = bookmark.word || '';
-    console.log('[STARTUP] localCache before merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
+
+    console.log('[STARTUP] localCache after merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length + ' checkin=' + Object.keys(localCache.checkin).length + ' (hadLocalSnapshot=' + hadLocalData + ')');
+
+    // ★ 如果本地快照有数据但服务器为空（说明之前 API 同步失败），主动回传一次
+    if (hadLocalData && Object.keys(remoteStates).length === 0 && Object.keys(_snapStates).length > 0) {
+      console.log('[STARTUP] server empty but local has data, re-syncing to server...');
+      _reSyncLocalToServer();
+    }
+
     _mergeLocalStorageIntoCache();
-    console.log('[STARTUP] localCache after merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
     console.warn('Backend unavailable, offline mode', e);
-    // 仅在网络错误时使用 localStorage 兜底
     _restoreFromLocalStorage();
   }
   invalidateVocabCache();
 }
+
+// ★ 主动回传：本地快照有数据但服务器为空时，把本地数据推送到服务器
+function _reSyncLocalToServer() {
+  try {
+    // 1. 回传单词状态
+    const statesToSync = Object.keys(localCache.states).filter(function(k) {
+      return localCache.states[k] !== 0;
+    });
+    if (statesToSync.length > 0) {
+      var batchStates = {};
+      for (var i = 0; i < statesToSync.length; i++) {
+        var parts = statesToSync[i].split(':');
+        if (parts.length === 2) batchStates[statesToSync[i]] = localCache.states[statesToSync[i]];
+      }
+      if (Object.keys(batchStates).length > 0) {
+        apiFetchSilent('PUT', '/states/batch', {states: batchStates});
+      }
+    }
+    // 2. 回传星标
+    if (localCache.starred.length > 0) {
+      apiFetchSilent('POST', '/starred', {words: localCache.starred});
+    }
+    // 3. 回传打卡
+    if (Object.keys(localCache.checkin || {}).length > 0) {
+      // POST /checkin 会自动插入今天的，但历史记录需要逐条
+      // 简化处理：只重新发送今天的是否已打卡（服务器端 INSERT OR IGNORE）
+      if (localCache.checkin[ciTodayKey()]?.c || localCache.checkin[_todayKey()]?.c) {
+        apiFetchSilent('POST', '/checkin');
+      }
+    }
+    console.log('[SYNC] re-sync triggered: ' + statesToSync.length + ' states, ' + localCache.starred.length + ' starred, checkin exists=' + !!Object.keys(localCache.checkin||{}).length);
+  } catch(e) {
+    console.warn('[SYNC] re-sync error:', e);
+  }
+}
+
+// 获取今日打卡 key 的工具函数（如果 ciTodayKey 在此作用域未定义）
+function _todayKey(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
 function _restoreFromLocalStorage() {
   // Fallback: read from localStorage

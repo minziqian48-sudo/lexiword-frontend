@@ -141,12 +141,15 @@ function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 
 // 登录前清除所有 LexiLearn 旧数据，防止账号间数据泄露
+// 注意：保留 lexi_snap_* 快照和 lexi_last_user，供主页面恢复使用
 function clearOldAppData() {
   const prefixes = ['lexi_','wrev3_','checkin_'];
   const keep = ['lexiword_token','lexi_accounts'];
+  // 快照键和最后用户标记必须保留（主页面启动时需要）
+  const keepPrefixes = ['lexi_snap_','lexi_snap_em_'];
   for(let i=localStorage.length-1;i>=0;i--){
     const k=localStorage.key(i);
-    if(k && prefixes.some(p=>k.startsWith(p)) && !keep.includes(k)){
+    if(k && prefixes.some(p=>k.startsWith(p)) && !keep.includes(k) && !keepPrefixes.some(p=>k.startsWith(p))){
       localStorage.removeItem(k);
     }
   }
