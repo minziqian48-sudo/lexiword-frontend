@@ -11,57 +11,57 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#C4956A">
+<meta name="theme-color" content="#4C52E8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="LexiLearn">
 <style>
 /* ══════════════════════════════════════════════════════
-   DESIGN TOKENS — 温暖米色调 (Bear/Linear Style)
+   DESIGN TOKENS — 深蓝紫现代风 (仿 Anki/Duolingo/Quizlet)
 ══════════════════════════════════════════════════════ */
 :root {
-  --bg:          #FBF7F0;
+  --bg:          #F0F2FA;
   --surface:     #FFFFFF;
-  --surface-2:   #F5F1E8;
-  --surface-3:   #EDE8DC;
-  --border:      rgba(180,150,110,.15);
-  --border-s:    rgba(180,150,110,.30);
-  --ink:         #3D3428;
-  --ink-2:       #6B5D4D;
-  --ink-3:       #9E9182;
-  --accent:      #C4956A;
-  --accent-2:    #A67B4F;
-  --accent-lt:   rgba(196,149,106,.12);
-  --accent-glow: rgba(196,149,106,.20);
-  --s2-bg:#FDF0EF; --s2-bd:#D4756A; --s2-ink:#B04035;
-  --s3-bg:#EFF5E8; --s3-bd:#5FA05C; --s3-ink:#3D723A;
-  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:28px;
+  --surface-2:   #F5F6FF;
+  --surface-3:   #EAECF8;
+  --border:      rgba(99,102,180,.12);
+  --border-s:    rgba(99,102,180,.28);
+  --ink:         #1A1F36;
+  --ink-2:       #4A5080;
+  --ink-3:       #8890C0;
+  --accent:      #4C52E8;
+  --accent-2:    #7B5CEA;
+  --accent-lt:   #EEEEFF;
+  --accent-glow: rgba(76,82,232,.18);
+  --s2-bg:#FFE8E8; --s2-bd:#E05050; --s2-ink:#B02020;
+  --s3-bg:#E0F5E9; --s3-bd:#2E9E54; --s3-ink:#1A6B38;
+  --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:28px;
   --nav-h:60px; --topbar-h:56px; --sidebar-w:290px;
-  --sh-xs: 0 1px 3px rgba(61,52,40,.05), 0 1px 2px rgba(61,52,40,.03);
-  --sh-sm: 0 4px 12px rgba(61,52,40,.07);
-  --sh-md: 0 8px 24px rgba(61,52,40,.10);
-  --sh-lg: 0 20px 48px rgba(61,52,40,.14);
+  --sh-xs: 0 1px 3px rgba(26,31,54,.06), 0 1px 2px rgba(26,31,54,.04);
+  --sh-sm: 0 4px 12px rgba(26,31,54,.08);
+  --sh-md: 0 8px 24px rgba(26,31,54,.12);
+  --sh-lg: 0 20px 48px rgba(26,31,54,.18);
   --ease:   cubic-bezier(.4,0,.2,1);
   --spring: cubic-bezier(.34,1.56,.64,1);
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
 }
 [data-theme="dark"] {
-  --bg:          #1A1816;
-  --surface:     #252220;
-  --surface-2:   #2E2A26;
-  --surface-3:   #383330;
-  --border:      rgba(180,150,110,.12);
-  --border-s:    rgba(180,150,110,.22);
-  --ink:         #EDE6DB;
-  --ink-2:       #B0A394;
-  --ink-3:       #7A6E62;
-  --accent:      #D4A57A;
-  --accent-2:    #B8875A;
-  --accent-lt:   rgba(212,165,122,.12);
-  --accent-glow: rgba(212,165,122,.18);
-  --s2-bg:#3A202F; --s2-bd:#E07060; --s2-ink:#FF9090;
-  --s3-bg:#1E2E1A; --s3-bd:#5FA05C; --s3-ink:#80D080;
+  --bg:          #0F1124;
+  --surface:     #1A1F3A;
+  --surface-2:   #222844;
+  --surface-3:   #2C3358;
+  --border:      rgba(120,128,220,.12);
+  --border-s:    rgba(120,128,220,.24);
+  --ink:         #E8EAFA;
+  --ink-2:       #9AA0D0;
+  --ink-3:       #5A6098;
+  --accent:      #6B70FF;
+  --accent-2:    #9B7FFF;
+  --accent-lt:   rgba(107,112,255,.15);
+  --accent-glow: rgba(107,112,255,.25);
+  --s2-bg:#3A1020; --s2-bd:#D05050; --s2-ink:#FF9090;
+  --s3-bg:#0E2A1A; --s3-bd:#2E9E54; --s3-ink:#60D080;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -75,15 +75,14 @@ body{
 
 /* APP SHELL */
 #app-shell{display:flex; flex-direction:column; height:100%; overflow:hidden;}
-#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size; padding-bottom:calc(var(--nav-h) + var(--sab)); scrollbar-width:none; -ms-overflow-style:none;}
-#page-area::-webkit-scrollbar{display:none;}
+#page-area{flex:1; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; contain:inline-size; padding-bottom:calc(var(--nav-h) + var(--sab));}
 
-/* BOTTOM NAV — 温暖极简 */
+/* BOTTOM TAB NAR */
 #bottom-nav{
   display:flex; flex-shrink:0;
   position:fixed; bottom:0; left:0; right:0;
   background:var(--surface); border-top:1px solid var(--border);
-  box-shadow:0 -2px 16px rgba(61,52,40,.06);
+  box-shadow:0 -4px 20px rgba(0,0,0,.07);
   padding-bottom:var(--sab);
   height:calc(var(--nav-h) + var(--sab));
   z-index:100;
@@ -93,11 +92,10 @@ body{
   gap:3px; cursor:pointer; padding:8px 0; border:none; background:none;
   color:var(--ink-3); font-size:10px; font-weight:700; letter-spacing:.02em;
   font-family:inherit; -webkit-tap-highlight-color:transparent; position:relative;
-  transition:color .2s ease;
 }
 .bnav-item.active{color:var(--accent);}
 .bnav-icon{font-size:22px; line-height:1; transition:transform .25s var(--spring);}
-.bnav-item.active .bnav-icon{transform:scale(1.15) translateY(-1px);}
+.bnav-item.active .bnav-icon{transform:scale(1.18) translateY(-2px);}
 .bnav-item.active::after{
   content:''; position:absolute; bottom:8px; width:4px; height:4px;
   background:var(--accent); border-radius:50%;
@@ -158,14 +156,15 @@ body{
 .sfoot-btn:active{background:var(--surface-3);}
 .sfoot-icon{font-size:16px;}
 
-/* VIEW PAGES — 温暖留白 */
-.view-page{display:none; padding:14px 16px 28px; animation:page-in .25s var(--ease) both; min-height:100%; overflow-x:hidden;}
+/* VIEW PAGES */
+.view-page{display:none; padding:12px 16px 24px; animation:page-in .2s var(--ease) both; min-height:100%; overflow-x:hidden;}
 .view-page.active{display:block;}
-@keyframes page-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes page-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-.page-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-top:calc(max(var(--sat), 10px) + 4px);}
-.page-title{font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-.02em;}
-.page-sub{font-size:12px; color:var(--ink-3); margin-top:3px;}
+/* 页面顶部间距，适配状态栏 */
+.page-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-top:calc(max(var(--sat), 10px) + 2px);}
+.page-title{font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-.03em;}
+.page-sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
 .page-header-actions{display:flex; gap:8px; align-items:center;}
 .icon-btn{width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:var(--surface); border:1.5px solid var(--border-s); border-radius:var(--r-md); font-size:18px; cursor:pointer; -webkit-tap-highlight-color:transparent;}
 
@@ -197,8 +196,8 @@ body{
 .ai-settings-btn-inline{display:flex; align-items:center; gap:6px; padding:7px 14px; font-size:12px; font-weight:700; border:1.5px solid var(--border-s); background:var(--surface-2); color:var(--ink-2); border-radius:20px; cursor:pointer;}
 
 /* LIST PAGE */
-.list-summary{display:flex; gap:0; margin-bottom:16px; background:linear-gradient(145deg, var(--accent), var(--accent-2)); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-sm);}
-.ls-item{flex:1; padding:16px 10px; text-align:center; border-right:1px solid rgba(255,255,255,.22);}
+.list-summary{display:flex; gap:0; margin-bottom:16px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh-sm);}
+.ls-item{flex:1; padding:16px 10px; text-align:center; border-right:1px solid rgba(255,255,255,.2);}
 .ls-item:last-child{border-right:none;}
 .ls-num{font-size:24px; font-weight:900; color:#fff;}
 .ls-label{font-size:10px; color:rgba(255,255,255,.8); text-transform:uppercase; margin-top:2px; letter-spacing:.04em;}
@@ -267,7 +266,7 @@ body{
 #btn-export-txt{padding:0 14px; background:var(--surface); border:1.5px solid var(--border-s); border-radius:var(--r-md); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;}
 .state-filter,.filter-scroll{display:flex; gap:5px; margin-bottom:8px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
 .state-filter::-webkit-scrollbar,.filter-scroll::-webkit-scrollbar{display:none;}
-.filter-btn{flex-shrink:0; padding:5px 13px; font-size:11px; font-weight:700; border-radius:20px; border:1.5px solid var(--border-s); background:var(--surface); color:var(--ink-2); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all .2s ease;}
+.filter-btn{flex-shrink:0; padding:5px 13px; font-size:11px; font-weight:700; border-radius:20px; border:1.5px solid var(--border-s); background:var(--surface); color:var(--ink-2); cursor:pointer; -webkit-tap-highlight-color:transparent;}
 .filter-btn.active{background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 8px var(--accent-glow);}
 .section-label{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); margin-bottom:6px;}
 .legend-box{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;}
@@ -310,7 +309,7 @@ body{
   position:absolute; 
   top:4px;        
   left:4px;       
-  background:linear-gradient(145deg,var(--accent),var(--accent-2)); 
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); 
   color:#fff; 
   font-size:9px; 
   font-weight:900; 
@@ -427,9 +426,8 @@ body[data-cn-mode="always"][data-cn-detail="full"] .word-card .wc-cn{
   opacity:1!important; height:1.6em!important; margin-top:4px!important;
 }
 .word-card[data-state="0"]{background:var(--surface); border-color:var(--border);}
-.word-card[data-state="star"]{background:var(--surface); border-color:var(--border);}
-.word-card[data-state="2"]{background:var(--s2-bg); border-color:rgba(212,117,106,.35);}
-.word-card[data-state="3"]{background:var(--s3-bg); border-color:rgba(95,160,92,.35);}
+.word-card[data-state="2"]{background:var(--s2-bg); border-color:var(--s2-bd);}
+.word-card[data-state="3"]{background:var(--s3-bg); border-color:var(--s3-bd);}
 
 /* 修复：闪光特效减小幅度，避免溢出到筛选栏白边 */
 @keyframes card-flash-green{
@@ -513,7 +511,7 @@ body[data-cn-mode="always"][data-cn-detail="full"] .word-card .wc-cn{
 .inline-cn{display:none; color:var(--ink-2); font-size:.82em; margin-left:2px;}
 .sentence-block.open .inline-cn{display:inline;}
 .word-chip{display:inline-block; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:800; font-family:'Georgia',serif; border:1.5px solid transparent; transition:background-color .15s,border-color .15s; -webkit-tap-highlight-color:transparent;}
-.word-chip[data-state="0"]{background:rgba(196,149,106,.08); border-color:rgba(196,149,106,.22);}
+.word-chip[data-state="0"]{background:rgba(76,82,232,.06); border-color:rgba(76,82,232,.2);}
 .word-chip[data-state="2"]{background:var(--s2-bg); border-color:var(--s2-bd); color:var(--s2-ink);}
 .word-chip[data-state="3"]{background:var(--s3-bg); border-color:var(--s3-bd); color:var(--s3-ink);}
 #wordcard-view{display:none;}
@@ -572,29 +570,29 @@ body[data-cn-mode="always"][data-cn-detail="full"] .word-card .wc-cn{
 .cal-day.other-month{ color:var(--ink-3); opacity:.4; }
 .cal-day.today{ border-color:var(--accent); color:var(--accent); font-weight:900; }
 .cal-day.has-log{
-  background:rgba(95,160,92,.15);
-  border-color:rgba(95,160,92,.45);
-  color:#3D723A;
+  background:rgba(34,197,94,.18);
+  border-color:rgba(34,197,94,.5);
+  color:#16a34a;
   font-weight:800;
 }
 .cal-day.has-log.today{
-  border-color:#3D723A;
+  border-color:#16a34a;
 }
 .cal-day.selected{
-  background:#3D723A !important;
+  background:#16a34a !important;
   color:#fff !important;
-  border-color:#3D723A !important;
+  border-color:#16a34a !important;
 }
 .cal-day.selected::after{ background:#fff; }
-/* 打卡页专用：已打卡日期暖绿色底 */
+/* 打卡页专用：已打卡日期绿色底 */
 .cal-day.logged{
-  background:rgba(95,160,92,.18);
-  border-color:rgba(95,160,92,.50);
-  color:#3D723A;
+  background:rgba(34,197,94,.2);
+  border-color:rgba(34,197,94,.55);
+  color:#16a34a;
   font-weight:800;
 }
 .cal-day.logged.today{
-  border-color:#3D723A;
+  border-color:#16a34a;
 }
 
 /* 学习日志条目 */
@@ -735,19 +733,15 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
 
 /* ── 滚动进度导轨 ── */
 .scroll-rail-wrap{
-  position:fixed; right:3px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
-  width:6px; z-index:60; pointer-events:none; opacity:0; transition:opacity .35s;
-  display:flex; justify-content:center;
+  position:fixed; right:4px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
+  width:4px; z-index:60; pointer-events:none; opacity:0; transition:opacity .3s;
 }
 .scroll-rail-wrap.visible{opacity:1;}
-.scroll-rail-track{width:4px;height:100%;background:var(--border);border-radius:2px;position:relative; overflow:hidden;}
+.scroll-rail-track{width:4px;height:100%;background:var(--border);border-radius:2px;position:relative;}
 .scroll-rail-thumb{
   position:absolute;left:0;width:4px;border-radius:2px;
-  background:var(--accent); min-height:24px; cursor:pointer; pointer-events:auto;
-  transition:height .15s ease, top .08s linear;
-  box-shadow: 0 0 6px rgba(196,149,106,.25);
+  background:var(--accent);min-height:24px;transition:top .1s linear;
 }
-.scroll-rail-thumb:active{background:var(--accent-2); width:5px; box-shadow:0 0 8px rgba(196,149,106,.4);}
 /* 字母导轨（词库页面） */
 .alpha-rail{
   position:fixed; right:3px; top:calc(max(var(--sat),20px) + 72px); bottom:calc(var(--nav-h) + var(--sab) + 12px);
@@ -797,20 +791,20 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
   height:6px;margin:0;border-radius:0;overflow:hidden;
   display:flex;width:100%;
 }
-.db-prog-mastered{height:100%;background:#5FA05C;transition:width .4s;flex-shrink:0;}
-.db-prog-failed{height:100%;background:#D4756A;transition:width .4s;flex-shrink:0;}
+.db-prog-mastered{height:100%;background:#22c55e;transition:width .4s;flex-shrink:0;}
+.db-prog-failed{height:100%;background:#ef4444;transition:width .4s;flex-shrink:0;}
 .db-prog-none{height:100%;background:var(--surface-3);flex:1;}
 
 
 /* 搜索栏统一样式 */
-#db-list-search, #db-detail-search, #vocab-search, #sets-search{
+#db-list-search, #db-detail-search, #vocab-search{
   flex:1; padding:11px 14px 11px 38px; font-size:14px;
   font-family:inherit; border:1.5px solid var(--border-s);
   border-radius:var(--r-md); background:var(--surface);
   color:var(--ink); outline:none; box-shadow:var(--sh-xs);
   min-width:0;
 }
-#db-list-search:focus, #db-detail-search:focus, #vocab-search:focus, #sets-search:focus{ border-color:var(--accent); }
+#db-list-search:focus, #db-detail-search:focus, #vocab-search:focus{ border-color:var(--accent); }
 
 /* 备份导出弹窗 */
 #backup-modal-overlay{
@@ -889,7 +883,7 @@ body[data-cn-mode="never"] .word-card.peek .wc-cn{opacity:0 !important;}
   transition:background .15s;
 }
 .pin-gap:hover::before,.pin-gap:active::before{
-  background:rgba(196,149,106,.22);
+  background:rgba(var(--accent-rgb,99,102,241),.25);
 }
 .pin-gap .pin-hint{
   font-size:10px; color:var(--ink-3); opacity:0;
@@ -972,13 +966,13 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 .wc-tog{display:none !important;}
 
 
-/* ── 打卡页 Hero — 温暖焦糖风 ── */
+/* ── 打卡页 Hero 重设计 ── */
 .ci-hero {
   position: relative;
-  background: linear-gradient(145deg, #C4956A 0%, #A67B4F 50%, #8B6343 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
   border-radius: var(--r-xl);
-  padding: 24px 20px 20px;
-  margin-bottom: 14px;
+  padding: 20px 18px 16px;
+  margin-bottom: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1068,12 +1062,11 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 .set-icon-btn { background:none;border:none;font-size:14px;padding:4px 6px;cursor:pointer;color:var(--ink-3);border-radius:6px;-webkit-tap-highlight-color:transparent; }
 .set-icon-btn:active { background:var(--surface-2); }
 /* 集合内单词卡片小一号 */
-.set-word-card { position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:8px 8px 6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:box-shadow .15s, background .2s; }
-.set-word-card[data-state="3"] { background:var(--s3-bg); border-color:rgba(95,160,92,.35); }
-.set-word-card[data-state="2"] { background:var(--s2-bg); border-color:rgba(212,117,106,.35); }
-.set-word-card[data-starred="1"] { background:var(--surface); }
+.set-word-card { position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);padding:8px 8px 6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:box-shadow .15s; }
+.set-word-card[data-state="3"] { background:var(--s3-lt);border-color:var(--s3-bd); }
 /* 已星标卡片：金色★始终显示，未星标时 card-btns 整体隐藏 */
 .word-card { position:relative; }
+.set-word-card[data-state="2"] { background:var(--s2-lt);border-color:var(--s2-bd); }
 .set-word-en { font-size:13px;font-weight:800;color:var(--ink);margin-top:14px;word-break:break-all; }
 .set-word-cn { font-size:9px;color:var(--ink-2);margin-top:3px;line-height:1.35;max-height:36px;overflow-y:auto;display:block; }
 .set-word-rm{position:absolute;bottom:4px;left:4px;z-index:3;font-size:9px;color:var(--ink-3);cursor:pointer;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.07);border:none;-webkit-tap-highlight-color:transparent;}
@@ -1096,7 +1089,7 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 /* 星标：右上角，点击卡片才出现 */
 /* 已书签卡片：轻微蓝色边框高亮 */
 #vocab-grid .word-card[data-bookmarked="1"]{
-  box-shadow:0 0 0 2px rgba(196,149,106,.25), var(--sh-sm);
+  box-shadow:0 0 0 2px rgba(76,82,232,.2), var(--sh-sm);
 }
 
 /* ── 选择集合底部弹窗 ── */
@@ -1124,9 +1117,9 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 #batch-add-header{padding:14px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
 #batch-add-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:10px;}
 #batch-add-search{width:100%;box-sizing:border-box;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--r-md);font-size:14px;background:var(--surface-2);color:var(--ink);outline:none;}
-#batch-add-search:focus{border-color:var(--accent);}
+#batch-add-search:focus{border-color:var(--primary);}
 #batch-add-sel-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;background:var(--surface-2);font-size:12px;color:var(--ink-3);flex-shrink:0;border-bottom:1px solid var(--border);}
-#batch-add-sel-count{font-weight:700;color:var(--accent);}
+#batch-add-sel-count{font-weight:700;color:var(--primary);}
 #batch-add-grid{overflow-y:auto;flex:1;padding:0;}
 .ba-chip{display:flex;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;user-select:none;gap:10px;}
 .ba-chip:active{background:var(--surface-2);}
@@ -1134,17 +1127,17 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 .ba-chip.already{opacity:.45;pointer-events:none;}
 .ba-chip-text{flex:1;min-width:0;}
 .ba-en{font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;}
-.ba-chip.selected .ba-en{color:var(--accent);}
+.ba-chip.selected .ba-en{color:var(--primary);}
 .ba-cn{font-size:11px;color:var(--ink-3);line-height:1.4;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ba-chip.already .ba-cn::after{content:' · 已添加';color:var(--accent);font-weight:600;}
+.ba-chip.already .ba-cn::after{content:' · 已添加';color:var(--primary);font-weight:600;}
 .ba-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;background:transparent;transition:all .15s;}
-.ba-chip.selected .ba-check{background:var(--accent);border-color:var(--accent);}
+.ba-chip.selected .ba-check{background:var(--primary);border-color:var(--primary);}
 .ba-chip.selected .ba-check::after{content:'✓';}
 .ba-tag{font-size:9px;color:var(--ink-3);margin-top:1px;}
 #batch-add-footer{display:flex;gap:10px;padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0;}
 #batch-add-footer button{flex:1;padding:12px;border-radius:var(--r-md);border:none;font-size:14px;font-weight:700;cursor:pointer;}
 #batch-cancel-btn{background:var(--surface-2);color:var(--ink-2);}
-#batch-confirm-btn{background:var(--accent);color:#fff;}
+#batch-confirm-btn{background:var(--primary);color:#fff;}
 </style>
 </head>
 <body>
@@ -1264,11 +1257,6 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
 <!-- ── 侧滑栏 ── -->
 
 <!-- ── 主体 ── -->
-<!-- 自定义滚动滑轨（词库/集合等长页面使用） -->
-<div class="scroll-rail-wrap" id="scrollRail">
-  <div class="scroll-rail-track"><div class="scroll-rail-thumb" id="scrollThumb"></div></div>
-</div>
-
 <div id="page-area" class="page-area">
 
   <!-- ══ 打卡首页 ══ -->
@@ -1287,11 +1275,11 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
   <!-- calendar pages -->
   <rect x="110" y="18" width="52" height="60" rx="6" fill="white"/>
   <rect x="116" y="24" width="40" height="48" rx="4" fill="white" opacity=".6"/>
-  <line x1="122" y1="34" x2="150" y2="34" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
-  <line x1="122" y1="41" x2="146" y2="41" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="122" y1="48" x2="148" y2="48" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="122" y1="55" x2="143" y2="55" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="122" y1="62" x2="150" y2="62" stroke="rgba(255,255,255,.25)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="122" y1="34" x2="150" y2="34" stroke="rgba(76,82,232,.5)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="122" y1="41" x2="146" y2="41" stroke="rgba(76,82,232,.35)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="122" y1="48" x2="148" y2="48" stroke="rgba(76,82,232,.35)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="122" y1="55" x2="143" y2="55" stroke="rgba(76,82,232,.35)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="122" y1="62" x2="150" y2="62" stroke="rgba(76,82,232,.25)" stroke-width="1.5" stroke-linecap="round"/>
   <!-- rings on calendar -->
   <circle cx="129" cy="22" r="4" fill="white" opacity=".7"/>
   <circle cx="143" cy="22" r="4" fill="white" opacity=".7"/>
@@ -1443,23 +1431,23 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
         <div class="db-illus-svg-wrap">
           <svg viewBox="0 0 130 72" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:130px;height:72px;display:block;">
   <!-- Book stack -->
-  <rect x="8"  y="38" width="52" height="10" rx="3" fill="var(--accent)" opacity=".18"/>
-  <rect x="12" y="28" width="48" height="12" rx="3" fill="var(--accent)" opacity=".26"/>
-  <rect x="6"  y="16" width="56" height="14" rx="3" fill="var(--accent)" opacity=".34"/>
+  <rect x="8"  y="38" width="52" height="10" rx="3" fill="var(--accent)" opacity=".15"/>
+  <rect x="12" y="28" width="48" height="12" rx="3" fill="var(--accent)" opacity=".22"/>
+  <rect x="6"  y="16" width="56" height="14" rx="3" fill="var(--accent)" opacity=".30"/>
   <!-- book spine lines -->
-  <line x1="18" y1="16" x2="18" y2="30" stroke="var(--accent)" stroke-width="1.2" opacity=".35"/>
-  <line x1="16" y1="28" x2="16" y2="40" stroke="var(--accent)" stroke-width="1.2" opacity=".30"/>
+  <line x1="18" y1="16" x2="18" y2="30" stroke="var(--accent)" stroke-width="1.2" opacity=".4"/>
+  <line x1="16" y1="28" x2="16" y2="40" stroke="var(--accent)" stroke-width="1.2" opacity=".35"/>
   <!-- bookmark ribbon on top book -->
-  <path d="M50 16 L50 8 L54 11 L58 8 L58 16" fill="var(--accent-2)" opacity=".50"/>
+  <path d="M50 16 L50 8 L54 11 L58 8 L58 16" fill="var(--accent-2)" opacity=".55"/>
   <!-- pencil -->
-  <rect x="74" y="10" width="8" height="46" rx="2" fill="var(--accent)" opacity=".16" transform="rotate(-18 74 10)"/>
-  <path d="M82 50 L79 57 L86 54 Z" fill="var(--accent-2)" opacity=".32" transform="rotate(-18 82 50)"/>
+  <rect x="74" y="10" width="8" height="46" rx="2" fill="var(--accent)" opacity=".18" transform="rotate(-18 74 10)"/>
+  <path d="M82 50 L79 57 L86 54 Z" fill="var(--accent-2)" opacity=".35" transform="rotate(-18 82 50)"/>
   <!-- sparkles -->
-  <circle cx="108" cy="18" r="2.5" fill="var(--accent)" opacity=".32"/>
-  <circle cx="118" cy="38" r="1.8" fill="var(--accent-2)" opacity=".28"/>
-  <circle cx="100" cy="52" r="2" fill="var(--accent)" opacity=".24"/>
+  <circle cx="108" cy="18" r="2.5" fill="var(--accent)" opacity=".35"/>
+  <circle cx="118" cy="38" r="1.8" fill="var(--accent-2)" opacity=".3"/>
+  <circle cx="100" cy="52" r="2" fill="var(--accent)" opacity=".25"/>
   <!-- small star -->
-  <path d="M122 20 L123.2 23.6 L127 23.6 L124 25.8 L125.2 29.4 L122 27.2 L118.8 29.4 L120 25.8 L117 23.6 L120.8 23.6 Z" fill="var(--accent-2)" opacity=".28"/>
+  <path d="M122 20 L123.2 23.6 L127 23.6 L124 25.8 L125.2 29.4 L122 27.2 L118.8 29.4 L120 25.8 L117 23.6 L120.8 23.6 Z" fill="var(--accent-2)" opacity=".3"/>
 </svg>
         </div>
       </div>
@@ -1514,11 +1502,6 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
         <button class="icon-btn" onclick="openNewSetModal()"><svg style="width:18px;height:18px;vertical-align:-2px;flex-shrink:0;" aria-hidden="true"><use href="#ic-plus"></use></svg></button>
         <button class="icon-btn" onclick="toggleDarkMode()"><svg style="width:18px;height:18px;vertical-align:-2px;flex-shrink:0;" aria-hidden="true"><use href="#ic-moon"></use></svg></button>
       </div>
-    </div>
-    <!-- 集合页工具栏（与词库对等） -->
-    <div class="search-wrap" style="margin-bottom:10px;">
-      <span class="search-icon" style="display:flex;align-items:center;"><svg style="width:16px;height:16px;vertical-align:-2px;flex-shrink:0;" aria-hidden="true"><use href="#ic-search"></use></svg></span>
-      <input type="text" id="sets-search" placeholder="搜索单词…" autocomplete="off" spellcheck="false" oninput="filterSetsWords()">
     </div>
     <div id="sets-list"></div>
     <div id="sets-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--ink-3);">
@@ -1641,7 +1624,7 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
     </div>
     <div id="batch-add-sel-bar">
       <span>已选 <span id="batch-add-sel-count">0</span> 个 · <span class="ba-result-count"></span></span>
-      <span id="batch-add-desel" onclick="batchDeselectAll()" style="color:var(--accent);cursor:pointer;display:none;">全部取消</span>
+      <span id="batch-add-desel" onclick="batchDeselectAll()" style="color:var(--primary);cursor:pointer;display:none;">全部取消</span>
     </div>
     <div id="batch-add-grid"><!-- 动态渲染 --></div>
     <div id="batch-add-footer">
@@ -1664,16 +1647,11 @@ body:not([data-cn-detail="full"]) .word-card .wc-cn{
     <div style="background:var(--surface-2);border-radius:var(--r-md);padding:16px;margin-bottom:14px;">
       <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📤 导出数据</div>
       <div style="font-size:11px;color:var(--ink-3);margin-bottom:12px;">将学习记录（打卡/掌握状态/星标/集合）保存为文件，以便换设备或更新后恢复。</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="doExportFile()" style="flex:1;min-width:0;height:44px;border-radius:var(--r-md);border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:800;cursor:pointer;"><svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"><use href="#ic-save"></use></svg> 下载文件</button>
-        <button onclick="doExportShare()" id="backup-share-btn" style="flex:1;min-width:0;height:44px;border-radius:var(--r-md);border:none;background:linear-gradient(135deg,#07C160,#06AE56);color:#fff;font-size:13px;font-weight:800;cursor:pointer;"><svg style="width:14px;height:14px;vertical-align:-2px;margin-right:3px;" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91"/><path d="M15 9l5-5m0 0l-5.008 5.008"/></svg> 分享发送</button>
-        <button onclick="doExportCopy()" style="flex:1;min-width:0;height:44px;border-radius:var(--r-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-size:13px;font-weight:800;cursor:pointer;" id="backup-copy-btn"><svg style="width:14px;height:14px;vertical-align:-2px;flex-shrink:0;margin-right:4px;" aria-hidden="true"><use href="#ic-copy"></use></svg> 复制</button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="doExportFile()" style="flex:1;height:44px;border-radius:var(--r-md);border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:800;cursor:pointer;">📥 下载备份文件</button>
+        <button onclick="doExportCopy()" style="flex:1;height:44px;border-radius:var(--r-md);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-size:13px;font-weight:800;cursor:pointer;" id="backup-copy-btn"><svg style="width:14px;height:14px;vertical-align:-2px;flex-shrink:0;margin-right:4px;" aria-hidden="true"><use href="#ic-copy"></use></svg> 复制JSON</button>
       </div>
-      <div id="backup-export-info" style="font-size:11px;color:var(--ink-3);margin-top:8px;text-align:center;line-height:1.6;"></div>
-      <div id="backup-export-actions" style="display:none;margin-top:10px;gap:8px;justify-content:center;">
-        <button onclick="openBackupFolder()" style="height:34px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;">📂 打开文件位置</button>
-        <button onclick="openBackupFile()" style="height:34px;padding:0 14px;border-radius:var(--r-sm);border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:700;cursor:pointer;">📄 打开文件</button>
-      </div>
+      <div id="backup-export-info" style="font-size:11px;color:var(--ink-3);margin-top:8px;text-align:center;"></div>
     </div>
 
     <!-- 导入区域 -->
@@ -1704,7 +1682,7 @@ function setToken(t)   { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken()  { localStorage.removeItem(TOKEN_KEY); }
 
 // 内存缓存
-const localCache = { states:{}, starred:[], checkin:{}, sets:[], pins:{}, bookmark:'', visitDays:{}, meanings:{}, bookmarks_vocab:[], bookmarks_db:[] };
+const localCache = { states:{}, starred:[], checkin:{}, sets:[], pins:{}, bookmark:'', visitDays:{}, meanings:{} };
 let _dataReady = false, _useRemote = false, _tokenValid = false, _currentUser = null;
 
 // 通用 fetch 封装（自动携带 Token、401 跳转）
@@ -1943,7 +1921,7 @@ function updateCiBtn(checked) {
   const hero=document.querySelector('.ci-hero');
   if (checked) {
     if(btn){btn.classList.add('checked');}
-    if(hero){hero.style.background='linear-gradient(145deg,#5FA05C,#3D723A)';}
+    if(hero){hero.style.background='linear-gradient(135deg,#22c55e,#16a34a)';}
     if(icon) icon.innerHTML='<svg style="width:36px;height:36px;stroke:#fff;display:block;" aria-hidden="true"><use href="#ic-check"></use></svg>';
     if(lbl) lbl.textContent='已打卡';
     if(ttl) ttl.textContent='今日打卡完成！';
@@ -1987,7 +1965,7 @@ function renderCiCal() {
     const el=document.createElement('div'); el.className='cal-day';
     el.textContent=dd;
     if(k===todayStr)el.classList.add('today');
-    if(d[k]?.c){el.classList.add('logged');el.style.cssText='background:rgba(95,160,92,.18);border-color:rgba(95,160,92,.50);color:#3D723A;font-weight:800;';}
+    if(d[k]?.c){el.classList.add('logged');el.style.cssText='background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.55);color:#16a34a;font-weight:800;';}
     container.appendChild(el);
   }
   const tot=container.children.length,rem=tot%7===0?0:7-(tot%7);
@@ -2488,7 +2466,7 @@ function buildSetsPage(){
     const words=set.words||[];
     const sec=document.createElement('div'); sec.className='set-section';
     const hdr=document.createElement('div'); hdr.className='set-section-hdr';
-    hdr.innerHTML=`<span class="set-section-name">${set.name}</span><span class="set-section-meta"><span style="font-size:11px;color:var(--ink-3);">${words.length} 词</span><button class="set-icon-btn" onclick="openAddWordToSet('${set.id}')" title="手动添加">＋</button><button class="set-icon-btn" onclick="openBatchAdd('${set.id}')" title="从词库批量添加"><svg style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-list"></use></svg></button><button class="set-icon-btn" onclick="renameSet('${set.id}')"><svg style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-pencil"></use></svg></button><button class="set-icon-btn" onclick="deleteSet('${set.id}')"><svg style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-trash"></use></svg></button></span>`;
+    hdr.innerHTML=`<span class="set-section-name">${set.name}</span><span class="set-section-meta"><span style="font-size:11px;color:var(--ink-3);">${words.length} 词</span><button class="set-icon-btn" onclick="openAddWordToSet('${set.id}')" title="手动添加">＋</button><button class="set-icon-btn" onclick="openBatchAdd('${set.id}')" title="从词库批量添加" style="font-size:11px;padding:0 5px;">📚</button><button class="set-icon-btn" onclick="renameSet('${set.id}')"><svg style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-pencil"></use></svg></button><button class="set-icon-btn" onclick="deleteSet('${set.id}')"><svg style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-trash"></use></svg></button></span>`;
     sec.appendChild(hdr);
     const grid=document.createElement('div'); grid.className='word-grid'; grid.id='sg-'+set.id;
     if(!words.length){
@@ -2497,10 +2475,7 @@ function buildSetsPage(){
       words.forEach(word=>{
         const m=getMeaning(word);
         const starred=localCache.starred.includes(word);
-        // 查询单词状态（从任意day中获取）
-        let wordState=0;
-        for(let d=1;d<=28;d++){if((DAYBOOK_DATA[String(d)]||[]).find(e=>e.w===word)){wordState=dbGetState(d,word);break;}}
-        const card=document.createElement('div'); card.className='word-card has-cn-content'; card.dataset.word=word; card.dataset.setId=set.id; card.dataset.fullm=m; card.dataset.state=wordState;
+        const card=document.createElement('div'); card.className='word-card has-cn-content'; card.dataset.word=word; card.dataset.setId=set.id; card.dataset.fullm=m;
         if(starred) card.dataset.starred='1';
         // 移除按钮（左上，z-index低于书签，用不同位置区分）
         const rmBtn=document.createElement('button');
@@ -2565,20 +2540,6 @@ function renameSet(setId){
 function deleteSet(setId){
   if(!confirm('确定删除这个集合？'))return;
   saveSets(getSets().filter(s=>s.id!==setId)); buildSetsPage();
-}
-
-/* ── 集合页搜索 ── */
-function filterSetsWords(){
-  const q=(document.getElementById('sets-search')?.value||'').trim().toLowerCase();
-  document.querySelectorAll('#sets-list .set-word-card').forEach(card=>{
-    const w=(card.dataset.word||'').toLowerCase();
-    card.style.display=(!q||w.includes(q))?'':'none';
-  });
-  // 隐藏空的集合section
-  document.querySelectorAll('#sets-list .set-section').forEach(sec=>{
-    const visibleCards=sec.querySelectorAll('.set-word-card[style!="display:none"],.set-word-card:not([style])');
-    sec.style.display=visibleCards.length?'':'none';
-  });
 }
 
 let _addWordSetId = null;
@@ -2939,8 +2900,6 @@ function _collectBackupData(){
   if((localCache.sets||[]).length) add('lexi_sets_v1', JSON.stringify(localCache.sets));
   if(Object.keys(localCache.pins||{}).length) add('lexi_pin_v1', JSON.stringify(localCache.pins));
   if(localCache.bookmark) add('lexi_vocab_bookmark_v1', localCache.bookmark);
-  if((localCache.bookmarks_vocab||[]).length) add('lexi_bookmarks_vocab_v2', JSON.stringify(localCache.bookmarks_vocab));
-  if((localCache.bookmarks_db||[]).length) add('lexi_bookmarks_db_v2', JSON.stringify(localCache.bookmarks_db));
   if(Object.keys(localCache.visitDays||{}).length) add('lexi_visit_v1', JSON.stringify(localCache.visitDays));
 
   // 2. 直接扫描 localStorage，补充未同步到 localCache 的导入数据、自定义释义等
@@ -2963,7 +2922,7 @@ function openBackupModal(){
   // 立即显示弹窗，避免用户感觉卡顿
   document.getElementById('backup-modal-overlay').style.display='flex';
   const info=document.getElementById('backup-export-info');
-  if(info)info.innerHTML='<span class="spinner" style="border-color:rgba(196,149,106,.3);border-top-color:var(--accent);"></span> 正在收集数据…';
+  if(info)info.innerHTML='<span class="spinner" style="border-color:rgba(76,82,232,.3);border-top-color:var(--accent);"></span> 正在收集数据…';
   document.getElementById('backup-import-text').value='';
   document.getElementById('backup-import-info').textContent='';
   // 异步采集数据，不阻塞 UI
@@ -3079,88 +3038,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Android back history init
   history.replaceState({page:'checkin'}, '');
   history.pushState({page:'checkin'}, '');
-
-  // ── 自定义滚动滑轨 ──
-  (function(){
-    const pa = document.getElementById('page-area');
-    const rail = document.getElementById('scrollRail');
-    const thumb = document.getElementById('scrollThumb');
-    if (!pa || !rail || !thumb) return;
-    let rafId = null;
-    let hideTimer = null;
-    let dragging = false;
-    const MIN_THUMB = 24;
-    const SHOW_DELAY = 1200;
-
-    function update() {
-      if (dragging) return; // 拖拽时由拖拽逻辑控制位置
-      const sh = pa.scrollHeight;
-      const ch = pa.clientHeight;
-      const st = pa.scrollTop;
-      if (sh <= ch + 1) { rail.classList.remove('visible'); return; }
-      rail.classList.add('visible');
-      const ratio = Math.max(0.12, ch / sh);
-      const trackH = rail.clientHeight;
-      const thumbH = Math.max(MIN_THUMB, ratio * trackH);
-      const maxTop = trackH - thumbH;
-      const thumbTop = sh > ch ? (st / (sh - ch)) * maxTop : 0;
-      thumb.style.height = thumbH + 'px';
-      thumb.style.top = thumbTop + 'px';
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => { if (!dragging) rail.classList.remove('visible'); }, SHOW_DELAY);
-    }
-
-    // ── 拖拽滚动 ──
-    function onDragStart(e) {
-      e.preventDefault();
-      dragging = true;
-      rail.classList.add('visible');
-      clearTimeout(hideTimer);
-      thumb.style.transition = 'none';
-      document.body.style.userSelect = 'none';
-      onDragMove(e);
-    }
-    function onDragMove(e) {
-      if (!dragging) return;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const trackRect = rail.getBoundingClientRect();
-      const trackH = trackRect.height;
-      const thumbH = thumb.offsetHeight;
-      let y = clientY - trackRect.top - thumbH / 2;
-      y = Math.max(0, Math.min(y, trackH - thumbH));
-      thumb.style.top = y + 'px';
-      // 反算滚动位置
-      const sh = pa.scrollHeight;
-      const ch = pa.clientHeight;
-      const maxTop = trackH - thumbH;
-      const scrollT = maxTop > 0 ? (y / maxTop) * (sh - ch) : 0;
-      pa.scrollTop = scrollT;
-    }
-    function onDragEnd() {
-      if (!dragging) return;
-      dragging = false;
-      thumb.style.transition = '';
-      document.body.style.userSelect = '';
-      hideTimer = setTimeout(() => { rail.classList.remove('visible'); }, SHOW_DELAY);
-    }
-
-    // Mouse events
-    thumb.addEventListener('mousedown', onDragStart);
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('mouseup', onDragEnd);
-    // Touch events
-    thumb.addEventListener('touchstart', onDragStart, {passive:false});
-    document.addEventListener('touchmove', onDragMove, {passive:false});
-    document.addEventListener('touchend', onDragEnd);
-
-    // Scroll listener (RAF throttled)
-    pa.addEventListener('scroll', function() {
-      if (rafId === null) rafId = requestAnimationFrame(function(){ update(); rafId = null; });
-    }, {passive:true});
-
-    window.addEventListener('resize', update, {passive:true});
-    setTimeout(update, 500);
-  })();
 });
 /* ── 全局详略模式 ── */
 let _detailMode = localStorage.getItem('lexi_detail_mode') || 'brief';
@@ -3245,225 +3122,81 @@ function _execCmdCopy(text, onSuccess, onFail) {
 }
 
 // Backup export/copy overrides for HBuilderX App and mobile WebView.
-
-/* ── 共享：把备份 JSON 写入 Android 公共 Download 目录 ──
-   返回 Promise<{filePath, fileURL}|{error}>
-   filePath 形如 /storage/emulated/0/Download/xxx.json
-   fileURL  形如 file:///storage/emulated/0/Download/xxx.json */
-function _writeBackupToPublic(json, filename){
-  return new Promise(function(resolve){
-    // ① HBuilderX：优先 PUBLIC_DOWNLOADS（Android 公共 Download 文件夹）
-    if(typeof plus!=='undefined' && plus.io){
-      try{
-        plus.io.requestFileSystem(plus.io.PUBLIC_DOWNLOADS, function(fs){
-          fs.root.getFile(filename, {create:true}, function(fileEntry){
-            fileEntry.createWriter(function(writer){
-              writer.onwrite = function(){
-                var fp = fileEntry.toLocalURL(); // file:///storage/...
-                resolve({filePath: fileEntry.fullPath, fileURL: fp});
-              };
-              writer.onerror = function(e){
-                // 公共目录写失败，fallback 到 _doc
-                _writeToDoc(json, filename).then(resolve, function(){
-                  resolve({error: 'public 写失败：'+(e&&e.message||'未知')});
-                });
-              };
-              writer.seek(0);
-              writer.write(json);
-            }, function(e){
-              _writeToDoc(json, filename).then(resolve, function(){
-                resolve({error: 'writer 创建失败：'+(e&&e.message||'未知')});
-              });
-            });
-          }, function(e){
-            _writeToDoc(json, filename).then(resolve, function(){
-              resolve({error: 'getFile 失败：'+(e&&e.message||'未知')});
-            });
-          });
-        }, function(e){
-          // PUBLIC_DOWNLOADS 不可用（iOS / 部分 Android），fallback _doc
-          _writeToDoc(json, filename).then(resolve, function(){
-            resolve({error: 'PUBLIC_DOWNLOADS 不可用：'+(e&&e.message||'未知')});
-          });
-        });
-        return;
-      }catch(e){
-        _writeToDoc(json, filename).then(resolve, function(){
-          resolve({error: 'HBuilderX 异常：'+e.message});
-        });
-        return;
-      }
-    }
-    // ② 浏览器环境：触发浏览器下载
-    try{
-      var blob=new Blob([json],{type:'application/json;charset=utf-8'});
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement('a');
-      a.href=url; a.download=filename; document.body.appendChild(a); a.click();
-      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
-      resolve({filePath:filename, fileURL:url, browser:true});
-    }catch(e){
-      resolve({error:'浏览器下载失败：'+e.message});
-    }
-  });
-}
-
-// HBuilderX 私有目录 fallback（_doc）
-function _writeToDoc(json, filename){
-  return new Promise(function(resolve, reject){
-    if(typeof plus==='undefined' || !plus.io){reject(new Error('no plus'));return;}
-    plus.io.resolveLocalFileSystemURL('_doc/', function(entry){
-      entry.getFile(filename, {create:true}, function(fileEntry){
-        fileEntry.createWriter(function(writer){
-          writer.onwrite = function(){
-            resolve({filePath: fileEntry.fullPath, fileURL: fileEntry.toLocalURL()});
-          };
-          writer.onerror = function(){reject(new Error('doc write fail'));};
-          writer.seek(0);
-          writer.write(json);
-        }, function(){reject(new Error('doc writer fail'));});
-      }, function(){reject(new Error('doc getFile fail'));});
-    }, function(){reject(new Error('doc resolve fail'));});
-  });
-}
-
-function _showExportInfo(text, fileURL){
-  var info = document.getElementById('backup-export-info');
-  var acts = document.getElementById('backup-export-actions');
-  if(info) info.innerHTML = text;
-  if(acts){
-    if(fileURL){
-      acts.style.display = 'flex';
-      acts.dataset.fileUrl = fileURL;
-    } else {
-      acts.style.display = 'none';
-    }
-  }
-}
-
-function openBackupFolder(){
-  var url = (document.getElementById('backup-export-actions')||{}).dataset?.fileUrl;
-  if(!url) return;
-  if(typeof plus!=='undefined'){
-    // 打开文件管理器（如果有）
-    try{ plus.runtime.openURL(url, function(){}, function(){ showToast('请到 Download 文件夹查看'); }); return; }catch(e){}
-  }
-  showToast('请到 Download 文件夹查看');
-}
-
-function openBackupFile(){
-  var url = (document.getElementById('backup-export-actions')||{}).dataset?.fileUrl;
-  if(!url) return;
-  if(typeof plus!=='undefined' && plus.runtime){
-    try{ plus.runtime.openFile(url, function(){}, function(){ showToast('请用文件管理器打开'); }); return; }catch(e){}
-  }
-  window.open(url, '_blank');
-}
-
 function doExportFile(){
   const backup = _cachedBackup || _collectBackupData();
   const {data,count}=backup;
   if(!count){showToast('暂无数据可备份');return;}
   const json=JSON.stringify(data,null,2);
   const filename='LexiLearn_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  _showExportInfo('正在保存…', null);
-  _writeBackupToPublic(json, filename).then(function(r){
-    if(r.error){
-      _showExportInfo('❌ 保存失败：'+r.error, null);
-      showToast('保存失败，请用「复制」');
-      return;
-    }
-    // r.filePath 形如 /Download/xxx.json（公共目录）
-    var pretty = r.filePath.replace(/^\//, '/').replace(/\//g, ' / ');
-    _showExportInfo(
-      '✅ 已保存到手机 Download 文件夹<br><span style="color:var(--ink-2);font-size:10px;word-break:break-all;">'+
-      (r.filePath||'')+'</span>',
-      r.fileURL
-    );
-    showToast('✅ 已保存');
-    closeBackupModal();
-  });
-}
 
-/* ═══ 分享发送（微信/系统分享）═══ */
-function doExportShare(){
-  const backup = _cachedBackup || _collectBackupData();
-  const {data,count}=backup;
-  if(!count){showToast('暂无数据可分享');return;}
-  const json=JSON.stringify(data,null,2);
-  const filename='LexiLearn_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  const btn=document.getElementById('backup-share-btn');
-  _showExportInfo('正在准备分享…', null);
-
-  // ① HBuilderX APK 原生分享：先写文件，再用真实文件 URL 唤起系统分享
-  if(typeof plus!=='undefined' && plus.share){
-    _writeBackupToPublic(json, filename).then(function(r){
-      if(r.error || !r.fileURL){
-        // 写文件失败：fallback 到纯文本分享
-        plus.share.sendWithSystem({
-          type:'text', content: json, title: filename
-        }, function(){ showToast('已分享（文本）'); closeBackupModal(); },
-           function(){ doExportCopy(); });
+  // ── HBuilderX App：优先通过 index.html 壳的原生桥接保存 ──
+  if (typeof plus !== 'undefined') {
+    try {
+      var launchWv = plus.webview.getLaunchWebview();
+      if (launchWv && launchWv.evalJS) {
+        launchWv.evalJS(
+          'if(window._lexiExportBackup) _lexiExportBackup(' +
+          JSON.stringify(json) + ',' + JSON.stringify(filename) + ')'
+        );
+        showToast('正在保存备份…');
+        closeBackupModal();
         return;
       }
-      // 系统分享（带真实文件 → 微信等都会出现）
-      plus.share.sendWithSystem({
-        type:'file',
-        files: [r.fileURL]
-      }, function(){
-        _showExportInfo(
-          '✅ 文件已保存并打开系统分享<br><span style="color:var(--ink-2);font-size:10px;word-break:break-all;">'+
-          (r.filePath||'')+'</span>',
-          r.fileURL
-        );
-        showToast('已打开系统分享');
-        // 不关弹窗，让用户看到文件位置，便于确认
-      }, function(e){
-        // 系统分享失败：fallback 文本分享
-        if(e && e.code !== -2){  // -2 = 用户取消
-          showToast('分享失败，已转为复制');
-        }
-        doExportCopy();
+    } catch(e) {}
+    // 兜底：直接用 plus.io
+    try {
+      function fallbackShare() {
+        try { plus.share.sendWithSystem({type:'text',content:json,title:filename},function(){},function(){}); }
+        catch(e2) { doExportCopy(); }
+      }
+      function tryWrite(entry) {
+        entry.getFile(filename, {create:true}, function(fileEntry) {
+          fileEntry.createWriter(function(writer) {
+            writer.onwrite = function() { showToast('已保存：'+filename); fallbackShare(); };
+            writer.onerror = fallbackShare;
+            writer.seek(0);
+            writer.write(json);
+          }, fallbackShare);
+        }, fallbackShare);
+      }
+      plus.io.resolveLocalFileSystemURL('_downloads/', tryWrite, function() {
+        plus.io.requestFileSystem(plus.io.PUBLIC_DOWNLOADS, tryWrite, fallbackShare);
       });
-    });
-    return;
-  }
-
-  // ② Web Share API（手机浏览器 → 微信/QQ等）
-  var blob=new Blob([json],{type:'application/json;charset=utf-8'});
-  if(navigator.share && navigator.canShare && navigator.canShare({files:[blob]})){
-    var file=new File([blob],filename,{type:'application/json'});
-    navigator.share({
-      title:'LexiLearn 数据备份',
-      text:'共 '+count+' 条学习记录',
-      files:[file]
-    }).then(function(){
-      _showExportInfo('✅ 已分享到 '+filename, null);
-      showToast('✅ 已分享');
+      showToast('正在保存备份…');
       closeBackupModal();
-    }).catch(function(err){
-      if(err.name==='AbortError') return;
-      console.warn('[Share]',err.message);
-      doExportFile();
-    });
-    return;
+      return;
+    } catch(e) {
+      doExportCopy();
+      return;
+    }
   }
 
-  // ③ 文字版分享（旧浏览器不支持文件分享）
-  if(navigator.share){
-    navigator.share({
-      title:'LexiLearn 数据备份',
-      text:json, url:''
-    }).then(function(){showToast('✅ 已分享');closeBackupModal();})
-     .catch(function(err){if(err.name!=='AbortError'){doExportFile();}});
-    return;
-  }
-
-  // ④ 桌面浏览器 fallback
-  showToast('当前环境不支持直接分享，将改为下载');
-  doExportFile();
+  _downloadBlob(new Blob([json], {type:'application/json;charset=utf-8'}), filename);
+  showToast('备份文件已下载');
 }
 
+function doExportCopy(){
+  const backup = _cachedBackup || _collectBackupData();
+  const {data,count}=backup;
+  if(!count){showToast('暂无数据可复制');return;}
+  const json=JSON.stringify(data,null,2);
+  const btn=document.getElementById('backup-copy-btn');
+  _safeCopy(json,
+    ()=>{if(btn){btn.innerHTML='<svg style="width:14px;height:14px;stroke:#fff;margin-right:4px;vertical-align:-2px;" aria-hidden="true"><use href="#ic-check"></use></svg> 已复制';setTimeout(()=>{btn.innerHTML='<svg style="width:14px;height:14px;margin-right:4px;vertical-align:-2px;" aria-hidden="true"><use href="#ic-copy"></use></svg> 复制JSON';},2500);}showToast('备份已复制到剪切板');},
+    ()=>{showToast('复制失败，请优先使用“下载备份文件”');}
+  );
+}
+
+function _safeCopy(text, onSuccess, onFail) {
+  if (typeof plus !== 'undefined' && plus.clipboard) {
+    plus.clipboard.setClipboardData(text,
+      function() { if (onSuccess) onSuccess(); },
+      function() { _execCmdCopy(text, onSuccess, onFail); }
+    );
+    return;
+  }
+  _execCmdCopy(text, onSuccess, onFail);
+}
 
 /* ── 右侧滚动进度滑块 ── */
 // 详细实现已移至页面底部 IIFE（vocab 专用，包含书签标记）
@@ -3496,15 +3229,6 @@ function updateVocabStats() {
 async function initData() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
-
-  // ★ 保存快照恢复的数据（_restoreAccountSnapshot 已在 initData 之前执行）
-  const _snapStates = Object.assign({}, localCache.states);
-  const _snapStarred = localCache.starred.slice();
-  const _snapCheckin = Object.assign({}, localCache.checkin);
-  const _snapSets = localCache.sets.slice();
-  const _snapPins = Object.assign({}, localCache.pins);
-  const hadLocalData = Object.keys(_snapStates).length > 0 || _snapStarred.length > 0 || Object.keys(_snapCheckin).length > 0;
-
   try {
     const [states, checkin, sets, pins, bookmark] = await Promise.all([
       apiFetch('GET', '/states'),
@@ -3514,87 +3238,25 @@ async function initData() {
       apiFetch('GET', '/bookmark'),
     ]);
     console.log('[STARTUP] initData API response: states=' + Object.keys(states.states||{}).length + ' starred=' + (states.starred||[]).length + ' sets=' + (sets||[]).length);
-
-    // ★ 合并策略：本地快照优先（用户最近操作），服务器数据补全
-    // states: 本地有则保留本地，无则用服务器
-    const remoteStates = states.states || {};
-    localCache.states = Object.assign({}, remoteStates, _snapStates);
-
-    // starred: 合并去重
-    const remoteStarred = states.starred || [];
-    localCache.starred = [...new Set([..._snapStarred, ...remoteStarred])];
-
-    // visitDays
+    localCache.states = states.states || {};
+    localCache.starred = states.starred || [];
     localCache.visitDays = states.visit_days || {};
-
-    // checkin: 合并（本地和服务器取并集）
-    const remoteCheckin = checkin.records || {};
-    localCache.checkin = Object.assign({}, remoteCheckin, _snapCheckin);
-
-    // sets: 用服务器版（集合是结构化数据，以服务器为准；如果本地有额外的也保留）
+    localCache.checkin = checkin.records || {};
     localCache.sets = sets || [];
-    if (_snapSets.length && (!localCache.sets.length)) localCache.sets = _snapSets;
-
-    // pins, bookmark: 以服务器为准，本地兜底
     localCache.pins = pins || {};
-    if (!Object.keys(localCache.pins).length && Object.keys(_snapPins).length) localCache.pins = _snapPins;
     localCache.bookmark = bookmark.word || '';
-
-    console.log('[STARTUP] localCache after merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length + ' checkin=' + Object.keys(localCache.checkin).length + ' (hadLocalSnapshot=' + hadLocalData + ')');
-
-    // ★ 如果本地快照有数据但服务器为空（说明之前 API 同步失败），主动回传一次
-    if (hadLocalData && Object.keys(remoteStates).length === 0 && Object.keys(_snapStates).length > 0) {
-      console.log('[STARTUP] server empty but local has data, re-syncing to server...');
-      _reSyncLocalToServer();
-    }
-
+    console.log('[STARTUP] localCache before merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
     _mergeLocalStorageIntoCache();
+    console.log('[STARTUP] localCache after merge: states=' + Object.keys(localCache.states).length + ' starred=' + localCache.starred.length);
     _useRemote = true;
     _dataReady = true;
   } catch(e) {
     console.warn('Backend unavailable, offline mode', e);
+    // 仅在网络错误时使用 localStorage 兜底
     _restoreFromLocalStorage();
   }
   invalidateVocabCache();
 }
-
-// ★ 主动回传：本地快照有数据但服务器为空时，把本地数据推送到服务器
-function _reSyncLocalToServer() {
-  try {
-    // 1. 回传单词状态
-    const statesToSync = Object.keys(localCache.states).filter(function(k) {
-      return localCache.states[k] !== 0;
-    });
-    if (statesToSync.length > 0) {
-      var batchStates = {};
-      for (var i = 0; i < statesToSync.length; i++) {
-        var parts = statesToSync[i].split(':');
-        if (parts.length === 2) batchStates[statesToSync[i]] = localCache.states[statesToSync[i]];
-      }
-      if (Object.keys(batchStates).length > 0) {
-        apiFetchSilent('PUT', '/states/batch', {states: batchStates});
-      }
-    }
-    // 2. 回传星标
-    if (localCache.starred.length > 0) {
-      apiFetchSilent('POST', '/starred', {words: localCache.starred});
-    }
-    // 3. 回传打卡
-    if (Object.keys(localCache.checkin || {}).length > 0) {
-      // POST /checkin 会自动插入今天的，但历史记录需要逐条
-      // 简化处理：只重新发送今天的是否已打卡（服务器端 INSERT OR IGNORE）
-      if (localCache.checkin[ciTodayKey()]?.c || localCache.checkin[_todayKey()]?.c) {
-        apiFetchSilent('POST', '/checkin');
-      }
-    }
-    console.log('[SYNC] re-sync triggered: ' + statesToSync.length + ' states, ' + localCache.starred.length + ' starred, checkin exists=' + !!Object.keys(localCache.checkin||{}).length);
-  } catch(e) {
-    console.warn('[SYNC] re-sync error:', e);
-  }
-}
-
-// 获取今日打卡 key 的工具函数（如果 ciTodayKey 在此作用域未定义）
-function _todayKey(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
 function _restoreFromLocalStorage() {
   // Fallback: read from localStorage
@@ -3622,8 +3284,6 @@ function _restoreFromLocalStorage() {
   try { localCache.pins = JSON.parse(localStorage.getItem('lexi_pin_v1')||'{}'); } catch(e) {}
   try { localCache.visitDays = JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}'); } catch(e) {}
   localCache.bookmark = localStorage.getItem('lexi_vocab_bookmark_v1')||'';
-  try { localCache.bookmarks_vocab = JSON.parse(localStorage.getItem('lexi_bookmarks_vocab_v2')||'[]'); } catch(e) { localCache.bookmarks_vocab=[]; }
-  try { localCache.bookmarks_db = JSON.parse(localStorage.getItem('lexi_bookmarks_db_v2')||'[]'); } catch(e) { localCache.bookmarks_db=[]; }
   _dataReady = true;
 }
 
@@ -3657,8 +3317,6 @@ function _mergeLocalStorageIntoCache() {
     if(Object.keys(pp).length) localCache.pins = pp;
     const bm=localStorage.getItem('lexi_vocab_bookmark_v1');
     if(bm) localCache.bookmark = bm;
-    try { const bv=JSON.parse(localStorage.getItem('lexi_bookmarks_vocab_v2')||'[]'); if(bv.length) localCache.bookmarks_vocab=bv; } catch(e){}
-    try { const bd=JSON.parse(localStorage.getItem('lexi_bookmarks_db_v2')||'[]'); if(bd.length) localCache.bookmarks_db=bd; } catch(e){}
     const vd=JSON.parse(localStorage.getItem('lexi_visit_v1')||'{}');
     if(Object.keys(vd).length) localCache.visitDays = vd;
     console.log('[MERGE] structured: checkin=' + Object.keys(localCache.checkin).length + ' sets=' + localCache.sets.length + ' pins=' + Object.keys(localCache.pins).length + ' visitDays=' + Object.keys(localCache.visitDays).length);
@@ -3796,7 +3454,7 @@ function _clearLexiLocalStorage(keepToken, keepAccounts) {
   if (keepToken) protect.push('lexiword_token');
   if (keepAccounts) protect.push('lexi_accounts');
   var keysToRemove = [];
-  var prefixes = ['lexi_db_','wrev3_','checkin_','lexi_ci_','lexi_sets_','lexi_pin_','lexi_vocab_bookmark_','lexi_bookmarks_vocab_','lexi_bookmarks_db_','lexi_visit_','lexi_last_view','lexi_last_user','lexi_custom_m_'];
+  var prefixes = ['lexi_db_','wrev3_','checkin_','lexi_ci_','lexi_sets_','lexi_pin_','lexi_vocab_bookmark_','lexi_visit_','lexi_last_view','lexi_last_user','lexi_custom_m_'];
   for (var i = localStorage.length - 1; i >= 0; i--) {
     var k = localStorage.key(i);
     if (!k) continue;
@@ -4038,256 +3696,241 @@ function _closeAllOverlays() {
 
 </script>
 <style>
-/* ═══ 多书签条 v2 — 紧凑横向chip栏 ═══ */
-.bm-bar {
-  display:flex; align-items:center; gap:6px; flex-wrap:nowrap;
-  padding:7px 10px; margin-bottom:8px;
-  background:rgba(196,149,106,.06); border:1px solid rgba(196,149,106,.12);
-  border-radius:var(--r-md); overflow-x:auto; scrollbar-width:none;
-  -webkit-overflow-scrolling:touch; animation:bm-in .25s var(--ease) both;
+.vocab-bookmark-chip{
+  display:inline-flex; align-items:center; gap:3px; margin-left:auto; flex-shrink:0;
+  padding:2px 8px; border-radius:999px;
+  font-size:11px; font-weight:700; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border-s);
+  color:var(--accent); white-space:nowrap; max-width:150px;
+  transition:box-shadow .2s;
 }
-.bm-bar::-webkit-scrollbar{ display:none; }
-@keyframes bm-in{ from{opacity:0;transform:translateY(-4px);} to{opacity:1;transform:translateY(0);} }
-
-.bm-bar-label{
-  flex-shrink:0; font-size:11px; font-weight:800; color:var(--accent);
-  display:inline-flex; align-items:center; gap:3px; white-space:nowrap;
-}
-
-.bm-chip {
-  flex-shrink:0; display:inline-flex; align-items:center; gap:2px;
-  padding:3px 8px 3px 10px; border-radius:999px;
-  background:var(--surface); border:1px solid rgba(196,149,106,.22);
-  color:var(--ink); font-size:11.5px; font-weight:700; cursor:pointer;
-  transition:all .18s var(--ease); user-select:none; -webkit-tap-highlight-color:transparent;
-}
-.bm-chip:hover{ border-color:var(--accent); box-shadow:0 1px 6px rgba(196,149,106,.15); }
-.bm-chip:active{ transform:scale(.96); }
-.bm-chip-word{ font-family:'Georgia',serif; overflow:hidden;text-overflow:ellipsis; max-width:80px;}
-.bm-chip-x{
-  font-size:13px; line-height:1; color:var(--ink-3); padding:0 2px;
-  opacity:.5; transition:opacity .15s;
-}
-.bm-chip-x:hover{ opacity:1; color:#E24B4A; }
-
-/* 书签按钮：左上角，卡片内绝对定位 */
-.vocab-bm-btn{
-  position:absolute; top:6px; right:6px; z-index:3;
-  width:24px; height:24px; border:none; background:rgba(255,255,255,.85);
-  backdrop-filter:blur(8px); border-radius:7px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  color:var(--ink-3); opacity:0; pointer-events:none;
-  transition:all .2s var(--ease); -webkit-tap-highlight-color:transparent;
-  box-shadow:0 1px 4px rgba(0,0,0,.08);
-}
-.word-card:hover .vocab-bm-btn,
-.word-card[data-bookmarked="1"] .vocab-bm-btn { opacity:1; pointer-events:auto; }
-.word-card[data-bookmarked="1"] .vocab-bm-btn { color:var(--accent); background:rgba(196,149,106,.12); }
-.word-card[data-bookmarked="1"].peek .vocab-bm-btn{ opacity:0; pointer-events:none; }
-.vocab-bm-btn svg{ width:14px; height:14px; stroke-width:1.9; }
-
-/* 已书签卡片高亮 */
+.vocab-bookmark-chip:hover{box-shadow:0 0 0 2px rgba(76,82,232,.15);}
+.vocab-bookmark-chip .bm-word{overflow:hidden; text-overflow:ellipsis; font-weight:800; font-family:'Georgia',serif;}
+.vocab-bookmark-chip .bm-clear{margin-left:2px; opacity:.4; font-size:13px; line-height:1; cursor:pointer;}
+.vocab-bookmark-chip .bm-clear:hover{opacity:.8;}
+/* vocab-bm-btn 样式已在主 CSS 中定义（左上角绝对定位） */
 #vocab-grid .word-card[data-bookmarked="1"],
 #db-wordgrid .word-card[data-bookmarked="1"]{
-  box-shadow:0 0 0 1.5px rgba(196,149,106,.28), var(--sh-sm);
+  box-shadow:0 0 0 2px rgba(76,82,232,.2), var(--sh-sm);
 }
-
-/* 跳转动画 */
+.scroll-rail-mark{
+  position:absolute; left:50%; transform:translateX(-50%);
+  width:10px; height:10px; border-radius:999px;
+  background:#fff; border:2px solid var(--accent);
+  box-shadow:0 2px 8px rgba(76,82,232,.22);
+  display:none;
+}
 @keyframes vocab-bookmark-flash{
   0%{transform:scale(1);}
   45%{transform:scale(1.03);}
   100%{transform:scale(1);}
 }
-#vocab-grid .word-card.bookmark-flash,
-#db-wordgrid .word-card.bookmark-flash{ animation:vocab-bookmark-flash .65s var(--ease); }
+#vocab-grid .word-card.bookmark-flash{animation:vocab-bookmark-flash .65s var(--ease);}
 </style>
 <script>
 (function(){
-  /* ═══════════════════ 多书签系统 v2 ═══════════════════
-     词库(books_vocab) 和 大纲词(books_db) 的书签互相独立
-     每个区域最多10个书签，localStorage持久化
-  ══════════════════════════════════════════════════════ */
-  const MAX_BM = 10;
-  const BM_KEYS = { vocab: 'lexi_bookmarks_vocab_v2', db: 'lexi_bookmarks_db_v2' };
+  const BOOKMARK_KEY='lexi_vocab_bookmark_v1';
 
-  // ── 数据读写 ──
-  function getBMs(type){ return localCache['bookmarks_'+type]||[]; }
-  function saveBMs(type){
-    const arr = localCache['bookmarks_'+type]||[];
-    try{ localStorage.setItem(BM_KEYS[type], JSON.stringify(arr)); }catch(e){}
-    apiFetchSilent('PUT','/bookmark',{word: arr.length?arr[arr.length-1]:''});
-    renderBookmarkBar(type);
-    refreshCardMarks(type);
+  function getBookmark(){ return localCache.bookmark; }
+  function setBookmark(word){
+    localCache.bookmark=word||'';
+    apiFetchSilent('PUT','/bookmark',{word:word||''});
   }
-  function addBM(type, word){
-    const arr = getBMs(type);
-    if(arr.includes(word)) return false;       // 已存在
-    if(arr.length >= MAX_BM) { showToast('最多 '+MAX_BM+' 个书签'); return false; }
-    arr.push(word);
-    saveBMs(type); showToast('已添加书签：'+word);
-    return true;
+  function findCard(word){
+    return Array.from(document.querySelectorAll('#vocab-grid .word-card')).find(card=>card.dataset.word===word)||null;
   }
-  function removeBM(type, word){
-    const arr = getBMs(type);
-    const i = arr.indexOf(word); if(i<0) return;
-    arr.splice(i,1);
-    saveBMs(type);
+  function ensureBookmarkBar(){
+    const container=document.querySelector('#view-vocab .vocab-cn-mode-bar');
+    if(!container || document.getElementById('vocab-bookmark-chip')) return;
+    const chip=document.createElement('span');
+    chip.id='vocab-bookmark-chip';
+    chip.className='vocab-bookmark-chip';
+    chip.style.display='none';
+    chip.onclick=function(e){ if(!e.target.closest('.bm-clear')) jumpToVocabBookmark(); };
+    container.appendChild(chip);
   }
-  function toggleBM(type, word){
-    const arr = getBMs(type);
-    if(arr.includes(word)) { removeBM(type,word); showToast('已移除书签'); }
-    else addBM(type,word);
+  function updateBookmarkBar(){
+    ensureBookmarkBar();
+    const chip=document.getElementById('vocab-bookmark-chip');
+    if(!chip) return;
+    const word=getBookmark();
+    if(!word){ chip.style.display='none'; return; }
+    const visible=Array.isArray(_vocabFiltered) && _vocabFiltered.includes(word);
+    chip.style.display='inline-flex';
+    chip.style.opacity=visible?'1':'.45';
+    chip.title=visible?'点击跳转到 '+word:'当前筛选下看不到该书签';
+    chip.innerHTML='<svg style=”width:11px;height:11px;flex-shrink:0” aria-hidden=”true”><use href=”#ic-bookmark”></use></svg><span class=”bm-word”>'+word+'</span><span class=”bm-clear” title=”清除书签”>×</span>';
   }
-
-  // ── 确保书签条容器存在 ──
-  function ensureBar(type){
-    var containerId = type==='vocab' ? 'view-vocab' : 'view-daybook-detail';
-    var barId = type+'-bookmark-bar';
-    var container = document.getElementById(containerId);
-    if(!container || document.getElementById(barId)){
-      var existing = document.getElementById(barId);
-      if(existing) return existing;
-      return null;
+  function ensureRail(){
+    let rail=document.querySelector('.scroll-rail-wrap');
+    if(!rail){
+      rail=document.createElement('div');
+      rail.className='scroll-rail-wrap';
+      rail.setAttribute('aria-hidden','true');
+      rail.innerHTML='<div class="scroll-rail-track"><div class="scroll-rail-thumb"></div><div class="scroll-rail-mark"></div></div>';
+      document.body.appendChild(rail);
+    }else if(!rail.querySelector('.scroll-rail-mark')){
+      const track=rail.querySelector('.scroll-rail-track');
+      if(track) track.insertAdjacentHTML('beforeend','<div class="scroll-rail-mark"></div>');
     }
-    var bar = document.createElement('div');
-    bar.id = barId;
-    bar.className = 'bm-bar';
-    bar.style.display='none';
-    // 插入到搜索栏后面
-    var sw = container.querySelector('.search-wrap');
-    if(sw && sw.nextSibling) sw.parentNode.insertBefore(bar, sw.nextSibling);
-    else container.querySelector('.db-body')?.prepend(bar) || container.appendChild(bar);
-    return bar;
+    return rail;
   }
-
-  // ── 渲染书签条 ──
-  function renderBookmarkBar(type){
-    var bar = ensureBar(type);
-    if(!bar) return;
-    var arr = getBMs(type);
-    if(!arr.length){ bar.style.display='none'; return; }
-    bar.style.display='flex';
-    bar.innerHTML = '<span class="bm-bar-label"><svg style="width:12px;height:12px;" aria-hidden="true"><use href="#ic-bookmark"></use></svg> 书签('+arr.length+')</span>'
-      + arr.map(function(w){
-        return '<span class="bm-chip" data-bm-word="'+w.replace(/"/g,'&quot;')+'" onclick="window._jumpBM(\''+type+'\',\''+w+'\')">'
-          + '<span class="bm-chip-word">'+w+'</span>'
-          + '<span class="bm-chip-x" onclick="event.stopPropagation();window._removeBM(\''+type+'\',\''+w+'\')">×</span>'
-          + '</span>';
-      }).join('');
-  }
-
-  // ── 刷新卡片上的书签标记（高亮已书签的卡片）──
-  function refreshCardMarks(type){
-    var gridSelector = type==='vocab' ? '#vocab-grid' : '#db-wordgrid';
-    var arr = getBMs(type);
-    var bmSet = new Set(arr);
-
-    // 清除旧标记
-    document.querySelectorAll(gridSelector+' .word-card[data-bookmarked]').forEach(function(card){
-      if(!bmSet.has(card.dataset.word)){
-        card.removeAttribute('data-bookmarked');
-        var btn = card.querySelector('.vocab-bm-btn');
-        if(btn){ btn.classList.remove('active'); btn.title='添加书签'; }
+  function refreshCards(){
+    const bookmark=getBookmark();
+    // 1. 给新卡片注入书签按钮（直接插入卡片，左上角绝对定位）
+    document.querySelectorAll('#vocab-grid .word-card:not([data-bm-init]), #db-wordgrid .word-card:not([data-bm-init])').forEach(card=>{
+      if(!card.querySelector('.vocab-bm-btn')){
+        const btn=document.createElement('button');
+        btn.className='vocab-bm-btn';
+        btn.setAttribute('aria-label','书签');
+        btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+        card.insertBefore(btn, card.firstChild);
       }
+      card.dataset.bmInit='1';
     });
-    // 设置新标记
-    arr.forEach(function(w){
-      var safe = w.replace(/"/g,'&quot;');
-      document.querySelectorAll(gridSelector+' .word-card[data-word="'+safe+'"]').forEach(function(card){
-        card.setAttribute('data-bookmarked','1');
-        var btn = card.querySelector('.vocab-bm-btn');
-        if(btn){ btn.classList.add('active'); btn.title='移除书签'; }
+    // 2. 书签状态：只更新旧书签卡 + 新书签卡，O(1) 而非 O(n)
+    document.querySelectorAll('#vocab-grid .word-card[data-bookmarked], #db-wordgrid .word-card[data-bookmarked]').forEach(card=>{
+      if(card.dataset.word===bookmark) return; // 仍是书签，跳过
+      const btn=card.querySelector('.vocab-bm-btn');
+      if(btn){btn.classList.remove('active');btn.title='设为书签';}
+      delete card.dataset.bookmarked;
+    });
+    if(bookmark){
+      const safe=bookmark.replace(/"/g,'&quot;');
+      document.querySelectorAll('#vocab-grid .word-card[data-word="'+safe+'"], #db-wordgrid .word-card[data-word="'+safe+'"]').forEach(card=>{
+        const btn=card.querySelector('.vocab-bm-btn');
+        if(btn){btn.classList.add('active');btn.title='取消书签';}
+        card.dataset.bookmarked='1';
       });
-    });
-  }
-
-  // ── 注入书签到卡片 ──
-  function injectBtns(){
-    ['#vocab-grid .word-card:not([data-bm-init])','#db-wordgrid .word-card:not([data-bm-init])'].forEach(function(sel){
-      document.querySelectorAll(sel).forEach(function(card){
-        if(!card.querySelector('.vocab-bm-btn')){
-          var btn = document.createElement('button');
-          btn.className = 'vocab-bm-btn';
-          btn.setAttribute('aria-label','书签');
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-          card.insertBefore(btn, card.firstChild);
-        }
-        card.setAttribute('data-bm-init','1');
-      });
-    });
-  }
-
-  // ── 跳转到指定书签单词 ──
-  window._jumpBM = function(type, word){
-    var gridSelector = type==='vocab' ? '#vocab-grid' : '#db-wordgrid';
-    var grid = document.querySelector(gridSelector);
-    if(!grid){ showToast('未找到列表'); return; }
-
-    var card = Array.from(grid.querySelectorAll('.word-card')).find(function(c){ return c.dataset.word===word; });
-
-    // 如果还没渲染完，尝试触发chunk加载
-    if(!card && typeof _vocabRenderedCount==='number' && typeof _vocabChunk==='function'){
-      while(typeof _vocabRenderedCount==='number' && _vocabRenderedCount<(_vocabFiltered||[]).length && !card){
-        _vocabChunk(grid);
-        card = Array.from(grid.querySelectorAll('.word-card')).find(function(c){ return c.dataset.word===word; });
-      }
     }
-    if(!card){ showToast('未找到：'+word); return; }
+  }
+  let _railRafId=null;
+  function updateRail(){
+    const pa=document.getElementById('page-area');
+    const rail=ensureRail();
+    const thumb=rail.querySelector('.scroll-rail-thumb');
+    const mark=rail.querySelector('.scroll-rail-mark');
+    const activeView=document.querySelector('.view-page.active');
+    if(!pa || !thumb || !mark || !activeView || activeView.id!=='view-vocab'){
+      rail.classList.remove('visible');
+      if(mark) mark.style.display='none';
+      return;
+    }
+    const scrollHeight=pa.scrollHeight-pa.clientHeight;
+    if(scrollHeight<=50){
+      rail.classList.remove('visible');
+      mark.style.display='none';
+      return;
+    }
+    const trackH=rail.offsetHeight;
+    // 用真实滚动比例计算滑块位置（不再用虚拟估算）
+    const pct=Math.min(Math.max(pa.scrollTop/scrollHeight,0),1);
+    const thumbH=Math.max(24,trackH*(pa.clientHeight/pa.scrollHeight));
+    thumb.style.height=thumbH+'px';
+    thumb.style.top=Math.min(pct*(trackH-thumbH),trackH-thumbH)+'px';
 
-    var pa = document.getElementById('page-area');
+    const bookmark=getBookmark();
+    const markCard=bookmark ? document.querySelector('#vocab-grid .word-card[data-word="'+bookmark.replace(/"/g,'&quot;')+'"]') : null;
+    if(markCard){
+      const cardRect=markCard.getBoundingClientRect();
+      const paRect=pa.getBoundingClientRect();
+      const cardY=cardRect.top-paRect.top+pa.scrollTop;
+      const totalH=pa.scrollHeight-pa.clientHeight;
+      if(totalH>0){
+        const markPct=Math.min(Math.max(cardY/totalH,0),1);
+        mark.style.top=Math.min(markPct*(trackH-10),trackH-10)+'px';
+        mark.style.display='block';
+      }else{mark.style.display='none';}
+    }else{
+      mark.style.display='none';
+    }
+    rail.classList.add('visible');
+    clearTimeout(updateRail._hideTimer);
+    updateRail._hideTimer=setTimeout(()=>rail.classList.remove('visible'),1200);
+  }
+  // RAF 节流：滚动时最多每帧更新一次，避免重复 layout
+  function scheduleRail(){
+    if(_railRafId) return;
+    _railRafId=requestAnimationFrame(()=>{_railRafId=null; updateRail();});
+  }
+  function refreshAll(){
+    ensureBookmarkBar();
+    refreshCards();
+    updateBookmarkBar();
+    updateRail();
+  }
+  function toggleBookmark(word){
+    const next=getBookmark()===word?'':word;
+    setBookmark(next);
+    refreshAll();
+    if(typeof showToast==='function') showToast(next?'已记录词库书签':'已清除词库书签');
+  }
+  window.toggleBookmark=toggleBookmark;
+
+  window.clearVocabBookmark=function(){
+    if(!getBookmark()) return;
+    setBookmark('');
+    refreshAll();
+    if(typeof showToast==='function') showToast('已清除词库书签');
+  };
+  window.jumpToVocabBookmark=function(){
+    const word=getBookmark();
+    if(!word){ if(typeof showToast==='function') showToast('还没有词库书签'); return; }
+    if(Array.isArray(_vocabFiltered) && !_vocabFiltered.includes(word)){ if(typeof showToast==='function') showToast('当前筛选下没有这个书签'); return; }
+    const grid=document.getElementById('vocab-grid');
+    if(!grid) return;
+    while(typeof _vocabRenderedCount==='number' && _vocabRenderedCount<_vocabFiltered.length && !findCard(word) && typeof _vocabChunk==='function'){
+      _vocabChunk(grid);
+    }
+    const card=findCard(word);
+    if(!card){ if(typeof showToast==='function') showToast('没有找到书签位置'); return; }
+    const pa=document.getElementById('page-area');
     if(pa){
-      var paRect = pa.getBoundingClientRect();
-      var cardRect = card.getBoundingClientRect();
-      var top = pa.scrollTop + (cardRect.top - paRect.top) - 100;
-      pa.scrollTo({ top: Math.max(0,top), behavior:'smooth' });
+      const paRect=pa.getBoundingClientRect();
+      const cardRect=card.getBoundingClientRect();
+      const top=pa.scrollTop+(cardRect.top-paRect.top)-100;
+      pa.scrollTo({top:Math.max(0,top),behavior:'smooth'});
     }
     card.classList.remove('bookmark-flash');
     void card.offsetWidth;
     card.classList.add('bookmark-flash');
-    setTimeout(function(){ card.classList.remove('bookmark-flash'); },700);
+    setTimeout(()=>card.classList.remove('bookmark-flash'),700);
+    updateRail();
   };
 
-  window._removeBM = function(type, word){ removeBM(type, word); };
+  // debounce：多次 chunk 触发合并为一次 refreshAll（间隔16ms，约一帧）
+  let _refreshDebTimer=null;
+  function debouncedRefresh(){clearTimeout(_refreshDebTimer);_refreshDebTimer=setTimeout(refreshAll,16);}
 
-  // ── 统一刷新 ──
-  function refreshAll(){
-    injectBtns();
-    renderBookmarkBar('vocab');
-    renderBookmarkBar('db');
-    refreshCardMarks('vocab');
-    refreshCardMarks('db');
-  }
+  const rawBuild=buildVocabPage;
+  buildVocabPage=function(){ const r=rawBuild.apply(this,arguments); debouncedRefresh(); return r; };
+  const rawRender=renderVocabGrid;
+  renderVocabGrid=function(){ const r=rawRender.apply(this,arguments); debouncedRefresh(); return r; };
+  const rawChunk=_vocabChunk;
+  _vocabChunk=function(){ const r=rawChunk.apply(this,arguments); debouncedRefresh(); return r; };
+  const rawSwitch=switchNav;
+  switchNav=function(){ const r=rawSwitch.apply(this,arguments); debouncedRefresh(); return r; };
 
-  // ── debounce ──
-  var _debTimer=null;
-  function debouncedRefresh(){ clearTimeout(_debTimer); _debTimer=setTimeout(refreshAll,16); }
-
-  // ── Hook 原始函数 ──
-  var origBuildVocabPage = typeof buildVocabPage==='function'?buildVocabPage:function(){};
-  var origRenderVocabGrid = typeof renderVocabGrid==='function'?renderVocabGrid:function(){};
-  var origVocabChunk = typeof _vocabChunk==='function'?_vocabChunk:function(){};
-  var origSwitchNav = typeof switchNav==='function'?switchNav:function(){};
-
-  buildVocabPage = function(){ var r=origBuildVocabPage.apply(this,arguments); debouncedRefresh(); return r; };
-  renderVocabGrid = function(){ var r=origRenderVocabGrid.apply(this,arguments); debouncedRefresh(); return r; };
-  _vocabChunk = function(){ var r=origVocabChunk.apply(this,arguments); debouncedRefresh(); return r; };
-  switchNav = function(){ var r=origSwitchNav.apply(this,arguments); debouncedRefresh(); return r; };
-
-  // ── 点击事件：判断是词库还是大纲词页面的书签按钮 ──
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest('.vocab-bm-btn');
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('.vocab-bm-btn');
     if(!btn) return;
-    var card = btn.closest('.word-card');
+    const card=btn.closest('.word-card');
     if(!card) return;
     e.preventDefault();
     e.stopPropagation();
+  },true);
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('.vocab-bm-btn');
+    if(!btn) return;
+    const card=btn.closest('.word-card');
+    if(!card) return;
+    toggleBookmark(card.dataset.word);
+  },true);
 
-    // 根据卡片所在网格判断类型
-    var grid = card.closest('#vocab-grid') ? 'vocab' : (card.closest('#db-wordgrid') ? 'db' : 'vocab');
-    toggleBM(grid, card.dataset.word);
-  }, true);
-
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(refreshAll,80); });
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshAll,80));
+  window.addEventListener('resize',updateRail);
+  const pageArea=document.getElementById('page-area');
+  if(pageArea) pageArea.addEventListener('scroll',scheduleRail,{passive:true});
 })();
 
 // PWA Service Worker — auto-reload when a new SW takes over
