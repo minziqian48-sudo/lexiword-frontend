@@ -3780,10 +3780,39 @@ function _restoreAccountSnapshot(userId) {
         }
         writeBatch();
       } else {
-        // 非切换模式：数据已在 localStorage 中，跳过空转的异步批量循环
-        console.log('[STARTUP] normal refresh, data in localStorage, merge cache directly');
-        _mergeLocalStorageIntoCache();
-        resolve();
+        // 非切换模式：检查 localStorage 是否已经有数据（页面刷新场景）
+        // 如果 localStorage 已被清空（登出后重登、用户清理浏览器缓存等），
+        // 仍需从快照恢复，避免数据丢失
+        var hasLocalData = false;
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && (k.indexOf('lexi_db_') === 0 || k.indexOf('wrev3_star_') === 0)) { hasLocalData = true; break; }
+        }
+        if (hasLocalData) {
+          console.log('[STARTUP] normal refresh, data in localStorage, merge cache directly');
+          _mergeLocalStorageIntoCache();
+          resolve();
+        } else {
+          console.log('[STARTUP] localStorage empty, restoring from snapshot to avoid data loss');
+          // 走和切换模式一样的恢复流程（不清 localStorage，因为它本来就是空的）
+          var BATCH2 = 50, bi2 = 0;
+          function writeBatch2() {
+            var end = Math.min(bi2 + BATCH2, entries.length);
+            for (; bi2 < end; bi2++) {
+              var k2 = entries[bi2][0], v2 = entries[bi2][1];
+              if (k2 === 'lexiword_token' || k2 === 'lexi_accounts') continue;
+              localStorage.setItem(k2, v2);
+            }
+            if (bi2 < entries.length) {
+              setTimeout(writeBatch2, 0);
+            } else {
+              console.log('[STARTUP] snapshot restored (' + entries.length + ' entries)');
+              _mergeLocalStorageIntoCache();
+              resolve();
+            }
+          }
+          writeBatch2();
+        }
       }
     } catch(e) { console.error('[STARTUP] _restoreAccountSnapshot error:', e); resolve(); }
   });
@@ -3951,6 +3980,9 @@ function doLogout() {
   _clearLexiLocalStorage(false, true); // 清空全部数据，保留账号列表
   clearToken();
   localStorage.removeItem('lexiword_token');
+  // ★ 关键修复：登出后必须标记"切换中"，下次登录时 _restoreAccountSnapshot
+  //   会走切换路径（写快照到 localStorage → merge 到 localCache），状态才不丢
+  localStorage.setItem('lexi_switching', '1');
   window.location.href = 'login.html';
 }
 
