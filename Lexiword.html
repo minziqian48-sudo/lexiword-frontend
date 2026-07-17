@@ -327,35 +327,25 @@ body{
 .db-star-btn{
   position:absolute; top:5px; right:5px; z-index:3;
   width:22px; height:22px; border-radius:6px;
-  background:rgba(255,255,255,.78); backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-  border:1px solid rgba(0,0,0,.08); box-shadow:0 1px 4px rgba(0,0,0,.1);
+  background:transparent; border:none; box-shadow:none;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer; opacity:1; transition:opacity .18s, transform .12s;
   color:var(--ink-3); padding:0; -webkit-tap-highlight-color:transparent;
 }
 .db-star-btn svg{width:12px; height:12px; pointer-events:none;}
 .db-star-btn.starred svg{fill:#F0A020; stroke:#F0A020;}
-.word-card.peek .db-star-btn{opacity:0; pointer-events:none;}
-.word-card[data-starred="1"] .db-star-btn{opacity:1; pointer-events:auto;}
-.word-card[data-starred="1"].peek .db-star-btn{opacity:0; pointer-events:none;}
 
 /* ── 书签按钮：左上角，默认常驻 ── */
 .vocab-bm-btn{
   position:absolute; top:5px; left:5px; z-index:3;
   width:22px; height:22px; border-radius:6px;
-  background:rgba(255,255,255,.78); backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-  border:1px solid rgba(0,0,0,.08); box-shadow:0 1px 4px rgba(0,0,0,.1);
+  background:transparent; border:none; box-shadow:none;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer; opacity:1; transition:opacity .18s, transform .12s;
   color:var(--ink-3); padding:0; -webkit-tap-highlight-color:transparent;
 }
 .vocab-bm-btn svg{width:11px; height:11px; pointer-events:none;}
-.word-card.peek .vocab-bm-btn{opacity:0; pointer-events:none;}
-.word-card[data-bookmarked="1"] .vocab-bm-btn{opacity:1; pointer-events:auto;}
-.word-card[data-bookmarked="1"].peek .vocab-bm-btn{opacity:0; pointer-events:none;}
-.vocab-bm-btn.active{background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 8px var(--accent-glow);}
+.vocab-bm-btn.active{color:var(--accent);}
 
 /* ── wc-en：强制单行，字符数分级字号，完整显示不截断 ── */
 .wc-en{
@@ -4105,17 +4095,14 @@ function _closeAllOverlays() {
 /* 书签按钮：左上角，卡片内绝对定位 */
 .vocab-bm-btn{
   position:absolute; top:6px; right:6px; z-index:3;
-  width:24px; height:24px; border:none; background:rgba(255,255,255,.85);
-  backdrop-filter:blur(8px); border-radius:7px; cursor:pointer;
+  width:24px; height:24px; border:none; background:transparent;
+  border-radius:7px; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  color:var(--ink-3); opacity:0; pointer-events:none;
+  color:var(--ink-3); opacity:1; pointer-events:auto;
   transition:all .2s var(--ease); -webkit-tap-highlight-color:transparent;
-  box-shadow:0 1px 4px rgba(0,0,0,.08);
+  box-shadow:none;
 }
-.word-card:hover .vocab-bm-btn,
-.word-card[data-bookmarked="1"] .vocab-bm-btn { opacity:1; pointer-events:auto; }
-.word-card[data-bookmarked="1"] .vocab-bm-btn { color:var(--accent); background:rgba(196,149,106,.12); }
-.word-card[data-bookmarked="1"].peek .vocab-bm-btn{ opacity:0; pointer-events:none; }
+.word-card[data-bookmarked="1"] .vocab-bm-btn { color:var(--accent); }
 .vocab-bm-btn svg{ width:14px; height:14px; stroke-width:1.9; }
 
 /* 已书签卡片高亮 */
