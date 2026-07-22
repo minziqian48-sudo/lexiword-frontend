@@ -345,7 +345,8 @@ body{
   color:var(--ink-3); padding:0; -webkit-tap-highlight-color:transparent;
 }
 .vocab-bm-btn svg{width:11px; height:11px; pointer-events:none;}
-.vocab-bm-btn.active{color:var(--accent);}
+.vocab-bm-btn.active{color:#F0A020;}
+.vocab-bm-btn.active svg path{fill:#F0A020; stroke:#F0A020;}
 
 /* ── wc-en：强制单行，字符数分级字号，完整显示不截断 ── */
 .wc-en{
@@ -2138,10 +2139,11 @@ function renderDaybookDetail(dayNum) {
     const bmBtn=document.createElement('button');
     bmBtn.className='vocab-bm-btn';
     bmBtn.setAttribute('aria-label','书签');
-    bmBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-    bmBtn.title='设为书签';
-    if(localCache.bookmark===entry.w){
-      bmBtn.classList.add('active'); bmBtn.title='取消书签';
+    const bmIsActive = localCache.bookmark===entry.w;
+    bmBtn.innerHTML='<svg viewBox="0 0 24 24" fill="'+(bmIsActive?'#F0A020':'none')+'" stroke="'+(bmIsActive?'#F0A020':'currentColor')+'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    bmBtn.title= bmIsActive ? '取消书签' : '设为书签';
+    if(bmIsActive){
+      bmBtn.classList.add('active');
       div.dataset.bookmarked='1';
     }
     div.insertBefore(bmBtn, div.firstChild);
@@ -4130,7 +4132,8 @@ function _closeAllOverlays() {
   transition:all .2s var(--ease); -webkit-tap-highlight-color:transparent;
   box-shadow:none;
 }
-.word-card[data-bookmarked="1"] .vocab-bm-btn { color:var(--accent); }
+.word-card[data-bookmarked="1"] .vocab-bm-btn { color:#F0A020; }
+.word-card[data-bookmarked="1"] .vocab-bm-btn svg path { fill:#F0A020; stroke:#F0A020; }
 .vocab-bm-btn svg{ width:14px; height:14px; stroke-width:1.9; }
 
 /* 已书签卡片高亮 */
@@ -4234,7 +4237,11 @@ function _closeAllOverlays() {
       if(!bmSet.has(card.dataset.word)){
         card.removeAttribute('data-bookmarked');
         var btn = card.querySelector('.vocab-bm-btn');
-        if(btn){ btn.classList.remove('active'); btn.title='添加书签'; }
+        if(btn){
+          btn.classList.remove('active');
+          btn.title='添加书签';
+          var p=btn.querySelector('svg path'); if(p){ p.setAttribute('fill','none'); p.setAttribute('stroke','currentColor'); }
+        }
       }
     });
     // 设置新标记
@@ -4243,7 +4250,11 @@ function _closeAllOverlays() {
       document.querySelectorAll(gridSelector+' .word-card[data-word="'+safe+'"]').forEach(function(card){
         card.setAttribute('data-bookmarked','1');
         var btn = card.querySelector('.vocab-bm-btn');
-        if(btn){ btn.classList.add('active'); btn.title='移除书签'; }
+        if(btn){
+          btn.classList.add('active');
+          btn.title='移除书签';
+          var p=btn.querySelector('svg path'); if(p){ p.setAttribute('fill','#F0A020'); p.setAttribute('stroke','#F0A020'); }
+        }
       });
     });
   }
@@ -4256,7 +4267,8 @@ function _closeAllOverlays() {
           var btn = document.createElement('button');
           btn.className = 'vocab-bm-btn';
           btn.setAttribute('aria-label','书签');
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+          var bmActive = card.dataset.bookmarked==='1';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="'+(bmActive?'#F0A020':'none')+'" stroke="'+(bmActive?'#F0A020':'currentColor')+'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
           card.insertBefore(btn, card.firstChild);
         }
         card.setAttribute('data-bm-init','1');
